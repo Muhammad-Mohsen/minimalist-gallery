@@ -1,0 +1,246 @@
+@font-face {
+	font-family: 'Material Symbols Outlined';
+	font-style: normal;
+	font-weight: 100 700;
+	src: url(assets/fonts/material-icons.woff2) format('woff2');
+}
+
+@font-face {
+	font-family: "Poppins";
+	font-style: normal;
+	font-weight: normal;
+	src: url("assets/fonts/Poppins-300.woff2");
+}
+
+@font-face {
+	font-family: "PoiretOne";
+	font-style: normal;
+	font-weight: normal;
+	src: url("assets/fonts/PoiretOne-Regular.woff2");
+}
+
+:root {
+	--bg: #DDD;
+	--bg-l: #fff; /* used in the background gradient */
+	--bg-sec: #222C; /* used in <modal-dialog> */
+	--fg: #000;
+	--fg-sec: #33333399;
+	--bg-alpha: #eee3;
+
+	--accent: #219653;
+	--p-text: 13px;
+	--text-s: 13px;
+	--text-m: 20px;
+	--text-l: 32px;
+	--text-xl: 48px;
+
+	--white: #fff;
+	--black: #222;
+	--green: #219653;
+	--red: #D20062;
+	--blue: #2F80ED;
+
+	--fab-size: 56px;
+	--fab-size-mini: 32px;
+
+	--scroll-overshoot: 20px;
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #000;
+		--bg-l: #151515;
+		--fg: #f2f2f2;
+		--fg-sec: #f2f2f277;
+		--bg-alpha: #1113;
+	}
+}
+
+/* RESETS */
+*, *::before, *::after {
+	box-sizing: border-box;
+	user-select: none;
+}
+* { font-family: Poppins; interpolate-size: allow-keywords; }
+html, body {
+	height: 100vh;
+	width: 100vw;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+}
+
+html { background: var(--bg); }
+
+/* ICON FONT */
+.material-symbols-outlined {
+	font-family: 'Material Symbols Outlined';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 24px;
+	line-height: 1;
+	letter-spacing: normal;
+	text-transform: none;
+	display: inline-block;
+	white-space: nowrap;
+	word-wrap: normal;
+	direction: ltr;
+	-webkit-font-feature-settings: 'liga';
+	font-feature-settings: 'liga';
+	-webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-outlined {
+	font-variation-settings:
+		'FILL' 0,
+		'wght' 200,
+		'GRAD' 0,
+		'opsz' 48
+}
+
+body.show {
+	opacity: 1 !important;
+	transition: .75s;
+}
+
+main {
+	position: relative;
+	height: 100vh;
+	width: 100vw;
+	display: flex;
+	flex-direction: column;
+	background: var(--bg) radial-gradient(circle at 30vw 30vh, var(--bg-l), var(--bg) 50%) 0 0 / 100vw 100vh;
+	overflow: auto;
+
+	&::after {
+		content: '';
+		position: fixed;
+		inset: 0 0 auto 0;
+		height: 64px;
+		background: linear-gradient(to bottom, var(--bg) 16px, transparent 56px);
+		pointer-events: none;
+	}
+}
+
+h1 {
+	display: flex;
+	flex-direction: column;
+	padding: 32px 0;
+	color: var(--fg-sec);
+	font: 400 18px/var(--text-xl) PoiretOne;
+	text-align: center;
+
+	& b {
+		color: var(--fg);
+		font: 400 var(--text-xl)/var(--text-xl) PoiretOne;
+	}
+}
+
+/* here for performance reasons...otherwise, we have to wait until the component js loads and runs before applying the css */
+todo-list { flex-grow: 1; }
+
+footer {
+	flex-shrink: 0;
+	position: sticky;
+	bottom: 0;
+	height: 150px;
+	display: flex;
+	align-items: center;
+	/* padding: 0 var(--scroll-overshoot);
+	scroll-padding: 0 var(--scroll-overshoot); */
+	overflow: scroll hidden;
+	/* scroll-snap-type: x mandatory; */
+}
+footer::-webkit-scrollbar { display: none; }
+footer.main-footer { background: linear-gradient(transparent, var(--bg) 40%); }
+
+.fab {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: var(--fab-size);
+	aspect-ratio: 1;
+	padding: 0;
+	border: 2px solid;
+	border-radius: 50%;
+	color: var(--fg);
+	background: transparent;
+	font-size: var(--text-l);
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+	transition: .1s ease-out, outline-offset .8s, outline-color .8s;
+	z-index: 1;
+
+	&:active, &:focus-visible {
+		outline-color: var(--fg-sec);
+		outline-offset: 4px;
+		transition: outline-offset .2s, outline-color .2s;
+	}
+
+	&.secondary { border: none; color: var(--fg-sec); }
+	&.mini {
+		--fab-size: var(--fab-size-mini);
+		font-size: 24px;
+	}
+}
+
+.fab.main {
+	margin-inline-start: calc(50% - var(--fab-size) / 2);
+	scroll-snap-align: center;
+	animation: scroll-hide both;
+	animation-timeline: scroll(x);
+}
+@keyframes scroll-hide {
+	0% { opacity: 1; }
+	30%, 100% { opacity: 0; }
+}
+
+.slide-indicator {
+	position: absolute;
+	inset: auto auto 60px calc(50% - 84px);
+	display: flex;
+
+	& span {
+		margin: 0 -10px;
+		color: var(--fg);
+		font-size: var(--text-l);
+		opacity: 0;
+		animation: pulse 1s ease-in-out 0s 2 forwards;
+
+		/* sequential pulse */
+		&:nth-child(3) { animation-delay: 1.5s; } /* half the duration */
+		&:nth-child(2) { animation-delay: 1.75s; } /* one fourth the duration */
+		&:nth-child(1) { animation-delay: 2s; }
+	}
+}
+
+@keyframes pulse {
+	20% { opacity: 0; }
+	60% { opacity: 1; }
+	100% { opacity: 0; }
+}
+
+.white.white { color: var(--fg); }
+.white.fill {
+	border-color: var(--fg);
+	background: var(--fg);
+	color: var(--bg-l);
+}
+.green.green { color: var(--green); }
+.green.fill {
+	border-color: var(--green);
+	background: var(--green);
+	color: var(--white);
+}
+.red.red { color: var(--red); }
+.red.fill {
+	border-color: var(--red);
+	background: var(--red);
+	color: var(--white);
+}
+.blue { color: var(--blue); }
+.blue.fill {
+	border-color: var(--blue);
+	background: var(--blue);
+	color: var(--white);
+}

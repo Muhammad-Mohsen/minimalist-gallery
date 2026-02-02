@@ -1,0 +1,125 @@
+labels-dialog {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+
+	backdrop-filter: blur(25px);
+	background: var(--bg-alpha);
+	/* mask-image: linear-gradient(transparent, black 10%); */
+
+	translate: 0 130vh;
+	transition: .35s cubic-bezier(0.7, 0, 0.84, 0);
+	z-index: 1;
+
+	&[open] {
+		translate: 0;
+		transition: .35s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	& h1 {
+		position: relative;
+		width: fit-content;
+		margin: 56px auto 12px;
+		padding: 0 12px;
+		color: var(--fg);
+
+		&::before, &::after {
+			content: '';
+			position: absolute;
+			inset: calc(50% - 1px) auto auto 0;
+			width: 100vw;
+			height: 2px;
+			background: var(--fg-sec);
+		}
+		&::before { translate: -100% 0; }
+		&::after { inset: calc(50% - 1px) auto auto 100%; }
+	}
+
+	& section {
+		display: flex;
+		flex-direction: column;
+		padding: 6px 0 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	& .label-entry {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		margin-block: 8px;
+		padding: 8px;
+		transition: .25s ease;
+
+		outline: 2px solid #0000;
+		outline-offset: -2px;
+
+		overflow: hidden;
+
+		* {
+			overflow: hidden;
+			transition: .25s ease;
+		}
+
+		&.hidden {
+			margin-block: 0;
+			padding-block: 0;
+			height: 0;
+			opacity: 0;
+
+			& * {
+				height: 0 !important;
+				padding-block: 0 !important;
+			}
+		}
+
+		& input, & button {
+			border: none;
+			background: transparent;
+			color: var(--fg);
+		}
+		& input[type="text"] {
+			flex-grow: 1;
+			padding: 4px 10px 3px;
+			outline: none;
+		}
+
+		& input[type="color"] {
+			padding: 4px;
+			border-radius: 50px;
+			outline: 2px solid var(--fg-sec);
+			outline-offset: -6px;
+			transition: .15s ease-out;
+
+			&:is(:focus, :focus-visible) { outline-offset: 2px solid var(--fg-sec); }
+		}
+		& input[type="color"]::-webkit-color-swatch-wrapper {
+			padding: 0;
+			border-radius: 50px;
+		}
+		& input[type="color"]::-webkit-color-swatch {
+			border: none;
+			border-radius: 50px;
+		}
+
+		& button { margin-inline-start: unset; }
+
+		& .red { opacity: 0; }
+	}
+	& .label-entry:focus-within {
+		/* box-shadow: 0 0 0 2px var(--fg-sec); */
+		outline-color: var(--fg-sec);
+		outline-offset: 4px;
+
+		& .red { opacity: 1; }
+	}
+
+	& footer {
+		flex-shrink: 0;
+		justify-content: flex-end;
+		gap: 20px;
+		padding: 0 calc(50% - var(--fab-size) / 2) 0 0;
+	}
+}

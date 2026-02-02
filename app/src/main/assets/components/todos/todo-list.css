@@ -1,0 +1,163 @@
+todo-list {
+	&.empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		color: var(--fg-sec);
+
+		&::before {
+			content: '¯\\_(ツ)_/¯';
+			margin-top: 15vh;
+			font-family: system-ui;
+			font-size: var(--text-xl);
+		}
+
+		&::after {
+			content: 'NOTHIN\' TO DO, I GUESS!!';
+		}
+	}
+
+	& .item {
+		display: flex;
+		padding: 0 var(--scroll-overshoot);
+		scroll-snap-type: x mandatory;
+		overflow: auto hidden;
+		scroll-behavior: smooth;
+		transition: .25s;
+
+		&.hidden {
+			height: 0;
+			opacity: 0;
+		}
+
+		& .content {
+			position: relative;
+			min-width: 100vw;
+			padding: 16px 32px 0 56px;
+			color: var(--fg);
+			font-size: 14px;
+			scroll-snap-align: start;
+			transition: .2s ease;
+
+			& span {
+				max-width: calc(100% - 36px);
+				margin-block-start: 2px;
+				font-size: var(--text-s);
+				transition: .5s;
+			}
+
+			& .labels {
+				flex: 1 0 100%;
+				display: flex;
+				gap: 8px;
+				margin-block: 8px;
+			}
+
+			& .pill {
+				width: 28px;
+				height: 4px;
+				border-radius: 50px;
+			}
+		}
+
+		& .content.done span {
+			color: var(--green);
+			text-decoration: line-through solid #00800088 3px;
+		}
+
+		& .content i {
+			position: absolute;
+			inset: 14px auto auto 16px;
+			color: var(--fg-sec);
+		}
+
+		& .content .done-marker {
+			color: var(--green);
+		}
+
+		& .content .undone-marker,
+		& .content.done .done-marker {
+			scale: 1;
+			opacity: 1;
+			transition: .2s ease-in .2s;
+			transform-origin: 12px 12px;
+		}
+
+		& .content .done-marker,
+		& .content.done .undone-marker {
+			scale: .1;
+			opacity: 0;
+			transition: .2s ease-out;
+			transform-origin: 12px 12px;
+		}
+
+		/* animation inspired by magnificode's codepen */
+		& .content .done-marker {
+			&::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 24px;
+				height: 24px;
+				border-radius: 50%;
+				border: 1px solid var(--green);
+				scale: 0;
+			}
+		}
+
+		& .content.done .done-marker {
+			&::before {
+				border-color: transparent;
+				scale: 2;
+				transition: scale 1s ease, 1s border-color ease .6s;
+			}
+		}
+
+		& .actions {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 6px 20px;
+			scroll-snap-align: end;
+
+			& button { width: 48px; font-size: 22px; }
+			& button.red { font-size: 24px; }
+		}
+
+		&::-webkit-scrollbar { display: none; }
+	}
+
+	& .move-target {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		height: 0;
+		color: var(--fg-sec);
+		/* background: repeating-linear-gradient(45deg, transparent, transparent 10px, var(--fg-sec) 10px, var(--fg-sec) 12px); */
+		opacity: 0;
+		font-size: 13px;
+		transition: .2s;
+
+		&.show {
+			height: var(--fab-size);
+			margin: 12px 0;
+			padding: 13px 11px;
+			border-block: 2px dashed var(--fg-sec);
+			opacity: 1;
+		}
+
+		& i {
+			color: var(--fg-sec);
+			font-size: 26px;
+		}
+	}
+
+	&:has(.move-source) .item { opacity: .3; pointer-events: none; }
+	& .move-source {
+		opacity: 1 !important;
+		pointer-events: all !important;
+
+		& .move { border-style: dashed; }
+	}
+}
