@@ -1,49 +1,7 @@
-const state = {
-	dir: null,
-	items: [],
-	image: null,
-}
 
-const permissionView = document.getElementById('permission-view');
-const explorer = document.getElementById('explorer-view');
-const viewer = document.getElementById('viewer-view');
+import './components/explorer-view.js';
+import './components/image-view.js';
 
-EventBus.subscribe((event) => {
-	if (event.target == EventBus.Target.MAIN) return;
-
-	when(event.type)
-	.is(EventBus.Type.LIST_DIR, () => {
-		state.dir = event.data.path;
-		state.items = event.data.items;
-
-		document.startViewTransition(() => {
-			explorer.renderItems(items);
-			explorer.renderCrumbs(path);
-		});
-	})
-	.is(EventBus.Type.BACK, () => {
-		if (todoDialog.isOpen()) return todoDialog.back();
-		else if (labelsDialog.isOpen()) return labelsDialog.saveAndClose();
-		else if (todoList.isMoving()) return todoList.moveItemCancel();
-
-		return EventBus.dispatch({ type: EventBus.Type.BACK, target: EventBus.Target.MAIN });
-	})
-	.otherwise(() => {
-		console.log('Unknown event', event);
-	});
-});
-
-// INIT
-setTimeout(() => document.body.classList.add('show'), 10);
-
-if (location.href.includes('mode=permission')) document.body.setAttribute('mode', 'permission'); // permission layout
-else EventBus.dispatch({ type: EventBus.Type.LIST_DIR, target: EventBus.Target.MAIN, data: { path: null } });
-
-
-
-// SLOP
-
-/*
 const App = (() => {
 	const state = {
 		view: 'explorer', // explorer | image
@@ -140,7 +98,7 @@ const App = (() => {
 
 				 // User requirement "use the hardware back button"
 				 // If we have history, pop it.
-
+				 /*
 				 if (state.history.length > 0) {
 					 const prev = state.history.pop();
 					 if (prev.view === 'explorer') {
@@ -153,6 +111,7 @@ const App = (() => {
 						EventBus.dispatch({ type: 'list_dir', target: 'native', data: { path: parent } });
 					 }
 				 }
+				 */
 				 // Better: Ask native for parent?
 				 // Or just implement simple UP logic here:
 				 if (state.path.split('/').length > 4) { // /storage/emulated/0 is depth 4
@@ -163,7 +122,5 @@ const App = (() => {
 		}
 	}
 
-	// init();
+	init();
 })();
-
-*/

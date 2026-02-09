@@ -1,36 +1,17 @@
 package com.minimalist.gallery.foundation
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
+import android.os.Build
+import android.os.Environment
+import androidx.annotation.RequiresApi
 import androidx.core.content.edit
+import com.minimalist.gallery.data.SortBy
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Timer
+import java.io.File
+import java.util.Arrays
 
-
-val String.Companion.EMPTY
-	get() = ""
-
-fun Context.unregisterReceiverSafe(receiver: BroadcastReceiver) {
-	try {
-		unregisterReceiver(receiver)
-
-	} catch (e: Exception) {
-		e.message?.let { Log.e("unregisterReceiverSafe", it) }
-	}
-}
-
-fun Timer?.cancelSafe() {
-	try {
-		this?.cancel()
-
-	} catch (e: Exception) {
-		e.message?.let { Log.e("cancelSafe", it) }
-	}
-}
-
+// PREFS
 fun SharedPreferences.put(key: String, value: Any) {
 	this.edit {
 		when (value) {
@@ -43,11 +24,8 @@ fun SharedPreferences.put(key: String, value: Any) {
 		}
 	}
 }
-fun SharedPreferences.getStringSafe(key: String, default: String): String {
-	return try { this.getString(key, default) ?: default }
-	catch (_: Exception) { default }
-}
 
+// JSON
 fun JSONObject.toMap(): Map<String, Any> {
 	val map = mutableMapOf<String, Any>()
 	val keysItr = this.keys()
@@ -75,4 +53,76 @@ fun JSONArray.toList(): List<Any> {
 		list.add(value)
 	}
 	return list
+}
+
+// FILE
+val ROOT = "/"
+val EXTERNAL_STORAGE_PATH: String = Environment.getExternalStorageDirectory().path
+
+fun File?.isRoot(): Boolean {
+	return (this?.absolutePath?.filter { it == '/' }?.length ?: 1) <= 1
+}
+fun File.isImage(): Boolean {
+	return this.exists()
+			&& listOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "heic", "heif", "tiff", "tif", "svg", "svgz", "ico")
+		.contains(this.extension.lowercase())
+}
+fun File.listFiles(sortBy: String): ArrayList<File> {
+	val fileModels = ArrayList<File>()
+
+	var files = listFiles { file ->
+		file.isDirectory || file.isImage()
+	}
+
+	// just to make sure that we aren't trapped in the basement
+	if (files == null) {
+		when (absolutePath) {
+			"/" -> files = arrayOf(File("/storage"))
+			"/storage" -> files = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) listVolumes() else arrayOf(File("/storage/emulated"))
+			"/storage/emulated" -> files = arrayOf(File("/storage/emulated/0"))
+		}
+	}
+
+	if (files == null) return ArrayList()
+
+	when (sortBy) {
+		SortBy.AZ, SortBy.ZA -> {
+			Arrays.sort(files) { o1, o2 ->
+				if (o1.isDirectory && !o2.isDirectory) -1
+				else if (o2.isDirectory && !o1.isDirectory) 1
+				else if (sortBy == SortBy.AZ) o1.name.compareTo(o2.name, ignoreCase = true) // both are the same thing, AZ
+				else o2.name.compareTo(o1.name, ignoreCase = true) // both are the same, ZA
+			}
+		}
+		SortBy.OLDEST, SortBy.NEWEST -> {
+			Arrays.sort(files) { o1, o2 ->
+				if (o1.isDirectory && !o2.isDirectory) -1
+				else if (o2.isDirectory && !o1.isDirectory) 1
+				else if (sortBy == SortBy.OLDEST) o1.lastModified().compareTo(o2.lastModified())
+				else o2.lastModified().compareTo(o1.lastModified())
+			}
+		}
+	}
+
+	for (f in files) fileModels.add(f)
+	return fileModels
+}
+
+// After the scoped storage changes, we can't access the SD card from "/storage".listFiles() anymore :)
+// this little guy returns them nonetheless
+@RequiresApi(Build.VERSION_CODES.R)
+private fun listVolumes(): Array<File> {
+//	val context = State.applicationContext
+//
+//	val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+//	return ArrayList(storageManager.storageVolumes.mapNotNull {
+//		// leaving this as is, causes a minor navigation problem...we end up with the breadcrumbs looking like storage/0/0 when navigating
+//		if (it.directory?.absolutePath == "/storage/emulated/0") File("/storage/emulated")
+//		else it.directory
+//
+//	}).toTypedArray()
+
+	return Array(1) {
+		File("dummy_path")
+	}
 }

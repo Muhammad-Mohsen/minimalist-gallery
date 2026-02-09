@@ -66,8 +66,9 @@ object EventBus {
 
 	object Type {
 		const val BACK = "back"
-		const val BACKUP = "backup"
-		const val RESTORE = "restore"
+		const val REQUEST_PERMISSION = "requestPermission"
+		const val MODE_CHANGE = "modeChange"
+		const val LIST_DIR = "listDir"
 	}
 
 	object Target {

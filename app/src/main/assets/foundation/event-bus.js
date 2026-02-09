@@ -3,15 +3,17 @@ var EventBus = (() => {
 	// the event `type`
 	const Type = {
 		BACK: 'back',
-		BACKUP: 'backup',
-		RESTORE: 'restore',
+		REQUEST_PERMISSION: 'requestPermission',
+		LIST_DIR: 'listDir',
+		VIEW_IMG: 'image',
 	}
 
 	// the event `target` (read: source)
 	const Target = {
-		LABEL_LIST: 'labelList',
 		MAIN: 'main',
 		ACTIVITY: 'activity',
+		PERMISSION_VIEW: 'permissionView',
+		EXPLORER_VIEW: 'explorerView',
 	}
 
 	const subscribers = []; // a regular ol' array will do

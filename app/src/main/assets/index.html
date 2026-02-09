@@ -1,80 +1,31 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
-	<meta charset="UTF-8" />
-	<title>Minimalist TODO</title>
-	<meta
-		name="viewport"
-		content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
-	/>
-	<meta name="format-detection" content="telephone=no" />
-	<meta name="msapplication-tap-highlight" content="no" />
-	<meta name="theme-color" content="#222" />
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-	<link rel="icon" type="image/x-icon" href="./assets/icons/favicon.ico" />
-	<!-- <link rel="manifest" href="./manifest.json" /> -->
+	<title>Minimalist Gallery</title>
 
-	<link rel="stylesheet" href="./style.css" />
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="assets/fonts/iconly.css">
 
+	<link rel="stylesheet" href="components/permission/permission.css">
+	<link rel="stylesheet" href="components/explorer/explorer.css">
+	<link rel="stylesheet" href="components/image/image.css">
+
+	<script src="foundation/event-bus.js"></script>
+	<script src="foundation/html-element.js"></script>
 	<script src="foundation/ext.js"></script>
-	<script src="foundation/fluent-db.js"></script>
-    <script src="foundation/repository.js"></script>
-    <script src="foundation/event-bus.js"></script>
 
-	<link rel="stylesheet" href="components/labels/label-list.css"/>
-	<script src="components/labels/label-list.js"></script>
+	<script src="components/permission/permission.js" defer></script>
+	<script src="components/explorer/explorer.js" defer></script>
+	<script src="components/image/image.js" defer></script>
 
-	<link rel="stylesheet" href="components/labels/labels-dialog.css"/>
-	<script src="components/labels/labels-dialog.js"></script>
-
-	<link rel="stylesheet" href="components/modal/modal.css"/>
-	<script src="components/modal/modal.js"></script>
-
-	<link rel="stylesheet" href="assets/color-picker/reinvented-color-wheel.min.css"/>
-	<script src="assets/color-picker/reinvented-color-wheel.min.js"></script>
-	<script src="assets/color-picker/color-picker.js"></script>
-
-	<!-- <link rel="stylesheet" href="components/backup/backup-restore-dialog.css"/>
-	<script src="components/backup/backup-restore-dialog.js"></script> -->
-
-	<link rel="stylesheet" href="components/todos/todo-list.css">
-	<script src="components/todos/todo-list.js"></script>
-
-	<link rel="stylesheet" href="components/todos/todo-dialog.css"/>
-	<script src="components/todos/todo-dialog.js"></script>
-
-	<script src="main.js"></script>
-
+	<script src="main.js" defer></script>
 </head>
-
 <body style="opacity: 0;">
-	<main>
-		<!-- TITLE -->
-		<h1>
-			Minimalist
-			<b>TODO</b>
-		</h1>
-
-		<!-- TODO LIST -->
-		<todo-list id="todoList"></todo-list>
-
-		<!-- FOOTER -->
-		<footer class="main-footer">
-
-			<!-- SLIDE ANIMATION -->
-			<div class="slide-indicator">
-				<span class="material-symbols-outlined">chevron_left</span>
-				<span class="material-symbols-outlined">chevron_left</span>
-				<span class="material-symbols-outlined">chevron_left</span>
-			</div>
-
-			<button class="material-symbols-outlined fab main" onclick="todoDialog.open()">add</button>
-			<label-list id="labelList" onfilter="todoList.onFiltersChanged(event)"></label-list>
-		</footer>
-
-		<todo-dialog id="todoDialog" onclose="todoList.connectedCallback()"></todo-dialog>
-		<labels-dialog id="labelsDialog" onclose="labelList.connectedCallback(); todoList.connectedCallback();"></labels-dialog>
-		<!-- <backup-restore-dialog id="backupRestoreDialog" onclose="labelList.connectedCallback(); todoList.connectedCallback();"></backup-restore-dialog> -->
-	 </main>
+	<permission-view></permission-view>
+	<explorer-view></explorer-view>
+	<image-view></image-view>
 </body>
 </html>

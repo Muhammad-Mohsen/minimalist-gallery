@@ -11,11 +11,11 @@ android {
 	compileSdk = 36
 
 	defaultConfig {
-		applicationId = "com.minimalist.gallery2"
+		applicationId = "com.minimalist.gallery"
 		minSdk = 27
 		targetSdk = 36
-		versionCode = 35
-		versionName = "2.1"
+		versionCode = 1
+		versionName = "1.0"
 	}
 
 	compileOptions {
@@ -64,4 +64,6 @@ android {
 dependencies {
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.appcompat)
+	implementation(libs.glide)
+	implementation(libs.androidx.webkit)
 }

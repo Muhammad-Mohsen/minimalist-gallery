@@ -3,10 +3,14 @@ agp = "8.11.1"
 kotlin = "2.2.20"
 coreKtx = "1.17.0"
 appcompat = "1.7.1"
+glide = "4.16.0"
+webkit = "1.12.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
