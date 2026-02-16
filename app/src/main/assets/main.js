@@ -1,44 +1,47 @@
-const state = {
-	dir: null,
-	items: [],
-	image: null,
+// STATE { mode, dir, items, image }
+const state = new URLSearchParams(location.search).toMap();
+
+const ipc = new InterProcessCommunication();
+
+if (state.mode == 'permission') {
+	document.startViewTransition(() => document.body.innerHTML = '<permission-view></permission-view>');
+}
+else {
+	ipc.dispatch({ type: ipc.Type.LIST_DIR, target: ipc.Target.JS, data: { dir: state.dir } });
 }
 
-const permissionView = document.getElementById('permission-view');
-const explorer = document.getElementById('explorer-view');
-const viewer = document.getElementById('viewer-view');
-
-EventBus.subscribe((event) => {
-	if (event.target == EventBus.Target.MAIN) return;
+ipc.subscribe((event) => {
+	if (event.target != ipc.Target.NATIVE) return;
 
 	when(event.type)
-	.is(EventBus.Type.LIST_DIR, () => {
-		state.dir = event.data.path;
-		state.items = event.data.items;
+		.is(ipc.Type.LIST_DIR, () => {
+			state.path = event.data.path;
+			state.items = event.data.items;
 
-		document.startViewTransition(() => {
-			explorer.renderItems(items);
-			explorer.renderCrumbs(path);
+			document.startViewTransition(() => {
+				document.body.innerHTML = '<explorer-view></explorer-view>';
+
+				const explorer = document.querySelector('explorer-view');
+				explorer.renderItems(state.items);
+				explorer.renderCrumbs(state.path);
+			});
+		})
+		.is(ipc.Type.PERMISSION_VIEW, () => {
+			if (event.data.mode == 'permission') {
+				document.startViewTransition(() => document.body.innerHTML = '<permission-view></permission-view>');
+			}
+		})
+		.is(ipc.Type.BACK, () => {
+			// if (todoDialog.isOpen()) return todoDialog.back();
+			// else if (labelsDialog.isOpen()) return labelsDialog.saveAndClose();
+			// else if (todoList.isMoving()) return todoList.moveItemCancel();
+
+			// return EventBus.dispatch({ type: EventBus.Type.BACK, target: EventBus.Target.JS });
+		})
+		.otherwise(() => {
+			console.log('Unknown event', event);
 		});
-	})
-	.is(EventBus.Type.BACK, () => {
-		if (todoDialog.isOpen()) return todoDialog.back();
-		else if (labelsDialog.isOpen()) return labelsDialog.saveAndClose();
-		else if (todoList.isMoving()) return todoList.moveItemCancel();
-
-		return EventBus.dispatch({ type: EventBus.Type.BACK, target: EventBus.Target.MAIN });
-	})
-	.otherwise(() => {
-		console.log('Unknown event', event);
-	});
 });
-
-// INIT
-setTimeout(() => document.body.classList.add('show'), 10);
-
-if (location.href.includes('mode=permission')) document.body.setAttribute('mode', 'permission'); // permission layout
-else EventBus.dispatch({ type: EventBus.Type.LIST_DIR, target: EventBus.Target.MAIN, data: { path: null } });
-
 
 
 // SLOP

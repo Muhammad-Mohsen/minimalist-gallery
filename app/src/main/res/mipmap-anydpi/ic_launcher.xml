@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
 	<background>
-		<inset android:drawable="@drawable/ic_launcher_background" android:inset="1%" />
+		<inset android:drawable="@drawable/ic_launcher_background" android:inset="16%" />
 	</background>
 	<foreground>
-		<inset android:drawable="@drawable/ic_launcher_foreground" android:inset="31%" />
+		<inset android:drawable="@drawable/ic_launcher_foreground" android:inset="32%" />
 	</foreground>
 	<monochrome>
-		<inset android:drawable="@drawable/ic_launcher_foreground" android:inset="31%" />
+		<inset android:drawable="@drawable/ic_launcher_foreground" android:inset="32%" />
 	</monochrome>
 </adaptive-icon>

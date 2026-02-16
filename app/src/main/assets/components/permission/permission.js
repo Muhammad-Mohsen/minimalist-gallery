@@ -5,12 +5,12 @@ class PermissionView extends HTMLElementBase {
 	}
 
 	request() {
-		EventBus.dispatch({ type: EventBus.Type.REQUEST_STORAGE_PERMISSION, target: EventBus.Target.PERMISSION_VIEW });
+		EventBus.dispatch({ type: EventBus.Type.REQUEST_PERMISSION, target: EventBus.Target.JS });
 	}
 
 	render() {
 		super.render(`
-			<p>Allow <strong>Storage</strong> access</p>
+			<p l10n>Allow <strong>Photos and videos</strong> access</p>
 			<button icon class="ic-unlock" onclick="${this}.request()" aria-label="grant storage permission"></button>
 		`);
 	}

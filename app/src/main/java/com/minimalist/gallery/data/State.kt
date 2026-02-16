@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import com.minimalist.gallery.foundation.put
-import java.io.File
 
 @SuppressLint("StaticFieldLeak")
 object State {
@@ -16,22 +15,18 @@ object State {
 		preferences = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
 	}
 
-	private var _currentDir: File? = null
-	var currentDir: File
+	private var _path: String? = null
+	var path: String
 		get() {
-			if (_currentDir == null) {
-				val savedPath = preferences.getString(Key.DIRECTORY, null) ?: "/"
-				val savedFile = File(savedPath)
-				// double check the file (it could've been removed, or that the SD card is unmounted!)
-				_currentDir = if (savedFile.exists()) savedFile else File("/")
-			}
-
-			return _currentDir!!
+			if (_path == null) _path = preferences.getString(Key.PATH, null) ?: "/"
+			return _path!!
 		}
 		set(value) {
-			_currentDir = value
-			preferences.put(Key.DIRECTORY, value.absolutePath)
+			preferences.put(Key.PATH, value)
+			_path = value
 		}
+
+	var image: String = ""
 
 	private var _sort: String? = null
 	var sort: String
@@ -53,6 +48,6 @@ object SortBy {
 }
 
 object Key {
-	const val DIRECTORY = "directory"
+	const val PATH = "path"
 	const val SORT = "sort"
 }

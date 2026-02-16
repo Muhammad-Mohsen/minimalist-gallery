@@ -14,16 +14,22 @@ explorer-view {
 
 		animation: shrink-header linear both;
 		animation-timeline: --grid-scroll;
-		animation-range: 0 20%;
+		animation-range: 0 200px;
 
-		h1 {
+		h1, sub {
 			color: var(--text);
 			font: 300 36px / 1 PoiretOne;
 			text-align: center;
 
 			animation: toggle-title linear reverse both;
 			animation-timeline: --grid-scroll;
-			animation-range: 0 20%;
+			animation-range: 0 200px;
+		}
+		sub {
+			display: block;
+			margin-top: 12px;
+			color: var(--text-light);
+			font-size: 13px;
 		}
 
 		h2 {
@@ -50,17 +56,41 @@ explorer-view {
 	grid {
 		flex-grow: 1;
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+		grid-template-columns: 1fr 1fr 1fr;
 		gap: 4px;
 		margin: 0 12px;
 		border-radius: 28px;
 		overflow-y: auto;
 		scroll-timeline: --grid-scroll y;
 
-		placeholder {
-			height: 200px;
+		button {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			height: 180px;
+			padding: 64px 8px 8px;
 			border-radius: 4px;
 			background: var(--background-light);
+
+			i { font-size: 28px; }
+			span {
+				display: -webkit-box;
+				font-size: 12px;
+				overflow: hidden;
+				line-clamp: 2;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+				word-break: break-all;
+			}
+		}
+		img {
+			width: 100%;
+			height: 180px;
+			object-fit: cover;
+			border-radius: 4px;
+			background: var(--background-light)
+				url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" fill="none" stroke="%23555"/><rect x="13" y="7.5" width="3" height="3" rx="1.5" fill="none" stroke="%23555" stroke-miterlimit="10"/><polyline points="17.5 20.5 7.5 10.5 3.5 14.5" fill="none" stroke="%23555"/></svg>')
+				50% / 32px no-repeat;
 		}
 	}
 
@@ -80,12 +110,12 @@ explorer-view {
 			scrollbar-width: none;
 		}
 
+		button { flex-shrink: 0; }
 		button:not([icon]) {
-			flex-shrink: 0;
 			display: flex;
 			align-items: center;
 			height: 48px;
-			padding: 0 12px 4px 0;
+			padding: 0 16px 4px;
 			border-radius: 50px;
 			color: var(--text-light);
 			font-size: 14px;
@@ -99,17 +129,13 @@ explorer-view {
 				pointer-events: none;
 			}
 
-			&::after {
-				content: '/';
-				margin-left: 12px;
-				font-weight: 400;
-			}
+			&:empty { display: none; }
 		}
 	}
 }
 
 @keyframes shrink-header {
-	100% { padding: 12px; }
+	100% {  margin-top: -25px; padding: 8px 12px; }
 }
 
 @keyframes toggle-title {

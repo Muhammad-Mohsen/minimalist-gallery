@@ -64,14 +64,14 @@ fun File?.isRoot(): Boolean {
 }
 fun File.isImage(): Boolean {
 	return this.exists()
-			&& listOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "heic", "heif", "tiff", "tif", "svg", "svgz", "ico")
+			&& listOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "heic", "heif", "svg", "svgz", "ico")
 		.contains(this.extension.lowercase())
 }
 fun File.listFiles(sortBy: String): ArrayList<File> {
 	val fileModels = ArrayList<File>()
 
 	var files = listFiles { file ->
-		file.isDirectory || file.isImage()
+		!file.isHidden && (file.isDirectory || file.isImage())
 	}
 
 	// just to make sure that we aren't trapped in the basement

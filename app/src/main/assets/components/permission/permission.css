@@ -1,15 +1,12 @@
 permission-view {
 	position: fixed;
 	inset: 0;
+	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	background: var(--background);
 	z-index: 3;
-
-	opacity: 0;
-	display: none;
-	transition: opacity .3s, display .2s allow-discrete;
 
 	p {
 		margin-top: auto;
@@ -28,11 +25,4 @@ permission-view {
 		margin-block: auto 24px;
 		font-size: 28px;
 	}
-}
-
-[mode="permission"] permission-view {
-	display: flex;
-	opacity: 1;
-
-	@starting-style { opacity: 0; }
 }

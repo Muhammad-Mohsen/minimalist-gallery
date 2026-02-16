@@ -25,7 +25,7 @@ class HTMLElementBase extends HTMLElement {
 	}
 
 	// translations
-	translate(keyOrComponent) {
+	translation(keyOrComponent) {
 		if (typeof keyOrComponent == 'string') return this.#translateString(keyOrComponent);
 		else return this.#translateComponent(keyOrComponent);
 	}

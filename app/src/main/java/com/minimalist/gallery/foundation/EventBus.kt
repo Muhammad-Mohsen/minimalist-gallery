@@ -67,11 +67,11 @@ object EventBus {
 	object Type {
 		const val BACK = "back"
 		const val REQUEST_PERMISSION = "requestPermission"
-		const val MODE_CHANGE = "modeChange"
-		const val LIST_DIR = "listDir"
+		const val PERMISSION_VIEW = "permissionView"
+		const val LIST_FILES = "listFiles"
 	}
 
 	object Target {
-		const val ACTIVITY = "activity"
+		const val NATIVE = "native"
 	}
 }

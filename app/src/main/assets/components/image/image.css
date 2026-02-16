@@ -1,0 +1,50 @@
+image-view {
+
+	position: fixed;
+	inset: 0;
+	background: var(--background);
+
+	&[src=""] { display: none; }
+
+	info-bar {
+		position: fixed;
+		inset: 0 0 auto;
+	}
+
+	image-carousel {
+		display: flex;
+		gap: 24px;
+
+		/* TODO setup scroll snapping */
+
+		img {
+			width: 100vw;
+			height: 100vh;
+			object-fit: contain;
+		}
+	}
+
+	thumbnail-carousel {
+		position: fixed;
+		display: flex;
+		overflow: auto;
+		img {
+
+		}
+
+		img.active {
+
+		}
+	}
+
+	toolbar {
+		position: fixed;
+		inset: auto auto 12px 50%;
+		translate: -50% 0;
+		display: flex;
+		gap: 8px;
+		padding: 4px;
+		border-radius: 28px;
+		background: var(--background-light);
+	}
+}

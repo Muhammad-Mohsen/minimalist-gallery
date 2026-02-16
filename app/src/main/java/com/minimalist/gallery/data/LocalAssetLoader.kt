@@ -34,14 +34,15 @@ class LocalAssetLoader(context: Context) {
 				val bitmap = Glide.with(context)
 					.asBitmap()
 					.load(file)
-					.submit(500, 500)
+					.submit(256, 256)
 					.get()
 
 				val stream = ByteArrayOutputStream()
 				bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
-				WebResourceResponse("image/jpeg", "UTF-8", ByteArrayInputStream(stream.toByteArray())
-				)
-			} catch (e: Exception) {
+				WebResourceResponse("image/jpeg", "UTF-8", ByteArrayInputStream(stream.toByteArray()))
+
+			}
+			catch (e: Exception) {
 				e.printStackTrace()
 				null
 			}

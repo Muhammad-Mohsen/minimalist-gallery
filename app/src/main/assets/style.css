@@ -12,7 +12,7 @@
 	--text: #f2f2f2;
 	--text-light: #f2f2f277;
 
-	--accent: #4d68b3;
+	--accent: #222;
 }
 @media (prefers-color-scheme: light) {
 	:root {
@@ -21,6 +21,7 @@
 		--background-translucent: #eee3;
 		--text: #000;
 		--text-light: #33333399;
+		--accent: #AAA;
 	}
 }
 
@@ -40,48 +41,28 @@ html, body {
 	width: 100vw;
 	padding: 0;
 	margin: 0;
+	background: var(--background);
 	overflow: hidden;
-}
-
-html { background: var(--background); }
-
-body.show {
-	opacity: 1 !important;
-	transition: opacity .75s;
-}
-
-main {
-	position: relative;
-	height: 100vh;
-	width: 100vw;
-	display: flex;
-	flex-direction: column;
-	background: var(--background) radial-gradient(circle at 30vw 30vh, var(--background-light), var(--background) 50%) 0 0 / 100vw 100vh;
-	overflow: auto;
-
-	&::after {
-		content: '';
-		position: fixed;
-		inset: 0 0 auto 0;
-		height: 64px;
-		background: linear-gradient(to bottom, var(--background) 16px, transparent 56px);
-		pointer-events: none;
-	}
 }
 
 button {
 	border: none;
 	color: var(--text);
 	background: transparent;
-	transition: .3s;
+	transition: .3s, color .5s, background .6s ease-in, border-color .3s, opacity .2s, translate .2s;
+
+	&:active {
+		background: var(--accent);
+		scale: .9;
+		transition: .3s, color .5s, background .3s, border-color .3s, opacity .2s, translate .2s;
+	}
 }
 
 button[icon] {
 	width: 48px;
 	aspect-ratio: 1;
 	border-radius: 50px;
-	background: var(--background-light);
 	font-size: 24px;
 
-	&:active { scale: .9; }
+	&:active { scale: .8; }
 }

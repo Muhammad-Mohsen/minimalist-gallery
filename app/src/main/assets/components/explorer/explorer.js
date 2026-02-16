@@ -1,86 +1,100 @@
 class ExplorerView extends HTMLElementBase {
-	TARGET = EventBus.Target.EXPLORER_VIEW;
-
 	constructor() {
 		super();
-		this.render();
-		EventBus.subscribe((event) => this.handler(event))
-
-		this.renderCrumbs('/storage/emulated/0/DCIM/Camera');
 	}
-
-	handler(event) {
-		if (event.target != this.TARGET) return;
-
-		when(event.type)
-			.is(EventBus.Type.LIST_DIR, () => {
-				this.renderCrumbs(event.data.path);
-				this.renderItems(event.data.items);
-			});
-	}
-
-	// TODO search + sort + selection
+	// TODO search + sort
 
 	onItemClick(event) {
-		event.preventDefault();
-
-		const type = event.target.tagName == 'IMG' ? EventBus.Type.VIEW_IMG : EventBus.Type.LIST_DIR;
-		const path = event.target.src || event.target.href;
-
-		EventBus.dispatch({ type, target: this.TARGET, data: { path } });
+		if (event.currentTarget.nodeName == 'BUTTON') {
+			EventBus.dispatch({
+				type: EventBus.Type.LIST_FILES,
+				target: EventBus.Target.JS,
+				data: { path: event.currentTarget.getAttribute('path') }
+			});
+		}
+		else {
+			// TODO set transition-name on target (thumbnail)
+			this.imageView ||= document.querySelector('image-view');
+			document.startViewTransition(() => this.imageView.src = event.target.src);
+		}
 	}
 
 	onCrumbClick(event) {
-		event.preventDefault();
-		const path = event.target.href;
-		EventBus.dispatch({ type: EventBus.Type.LIST_DIR, target: this.TARGET, data: { path } });
+		const path = event.target.getAttribute('path');
+		EventBus.dispatch({ type: EventBus.Type.LIST_FILES, target: EventBus.Target.JS, data: { path } });
 	}
 
-	onBackClick(event) {
-		event.preventDefault();
-		EventBus.dispatch({ type: EventBus.Type.BACK, target: this.TARGET });
+	onBackClick() {
+		EventBus.dispatch({ type: EventBus.Type.BACK, target: EventBus.Target.JS });
 	}
 
-	render() {
+	render(path, items) {
+		const basePath = state.debug ? '' : 'https://appassets.androidplatform.net/thumbnail/';
+		const parts = path.split('/');
+
+		const imageCount = items.filter(item => !item.isDirectory).length;
+
 		super.render(`
 			<header>
-				<h1 id="primary-title">Explorer</h1>
+				<h1 id="header">${parts[parts.length - 1]}</h1>
+				<sub l10n>${imageCount} ${imageCount == 1 ? 'Image' : 'Images'}</sub>
 				<actions>
-					<h2 id="secondary-title" aria-hidden="true">Explorer</h2>
+					<h2 id="selection-count"></h2>
 					<button icon class="ic-search" id="search-button"></button>
 					<button icon class="ic-sort" id="sort-button"></button>
 				</actions>
 			</header>
 
 			<grid id="items">
-				${Array.from({ length: 28 }).map(() => '<placeholder></placeholder>').join('')}
+				${
+					items.map(item => {
+						return item.isDirectory
+							? `
+								<button path="${item.path}" onclick="${this}.onItemClick(event)">
+									<i class="ic-folder"></i>
+									<span>${item.name}</span>
+								</button>
+							`
+							: `<img src="${basePath}${item.path}" loading="lazy" onclick="${this}.onItemClick(event)">`;
+					}).join('')
+				}
 			</grid>
 
 			<breadcrumb-bar>
-				<button icon class="ic-arrow-left" id="back-button" onclick="${this}.onBackClick(event)"></button>
-				<crumb-list id="crumbs"></crumb-list>
+				<button icon class="ic-arrow-left" id="back-button" onclick="${this}.onBackClick()"></button>
+				<crumb-list id="crumbs">
+					${
+						parts.map((part, index) => {
+							return `<button path="${parts.slice(0, index + 1).join('/')}" onclick="${this}.onCrumbClick(event)">${part}</button>`;
+						}).join('')
+					}
+				</crumb-list>
 			</breadcrumb-bar>
 		`);
 	}
 
 	renderItems(items) {
+		const basePath = state.debug ? '' : 'https://appassets.androidplatform.net/thumbnail/';
+
 		this.items.innerHTML = items.map(item => {
-			return item.type == 'dir'
+			return item.isDirectory
 				? `
-					<button href="${item.path}" onclick="${this}.onItemClick(event)">
+					<button path="${item.path}" onclick="${this}.onItemClick(event)">
 						<i class="ic-folder"></i>
 						<span>${item.name}</span>
 					</button>
 				`
-				: `<img src="${item.path}" loading="lazy" onclick="${this}.onItemClick(event)">`;
+				: `<img src="${basePath}${item.path}" loading="lazy" onclick="${this}.onItemClick(event)">`;
 		}).join('');
 	}
 
 	renderCrumbs(path) {
 		const parts = path.split('/');
 		this.crumbs.innerHTML = parts.map((part, index) => {
-			return `<button href="${parts.slice(0, index + 1).join('/')}" onclick="${this}.onCrumbClick(event)">${part}</button>`;
+			return `<button path="${parts.slice(0, index + 1).join('/')}" onclick="${this}.onCrumbClick(event)">${part}</button>`;
 		}).join('');
+
+		this.header.textContent = parts[parts.length - 1];
 
 		this.crumbs.scrollTo({ left: this.crumbs.scrollWidth });
 	}

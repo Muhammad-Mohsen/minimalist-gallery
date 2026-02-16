@@ -11,7 +11,8 @@ object FileCache {
 	private val lastModifiedCache = HashMap<String, Long>()
 
 	// API
-	fun listFiles(dir: File, sortBy: String = SortBy.AZ): ArrayList<File> {
+	fun listFiles(path: String, sortBy: String = SortBy.AZ): ArrayList<File> {
+		val dir = File(path)
 		val path = dir.absolutePath
 		var files = cache["$sortBy/$path"]
 

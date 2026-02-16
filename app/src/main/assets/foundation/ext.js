@@ -150,6 +150,13 @@ HTMLElement.prototype.toggleClass = function (classList, force) {
 	return this;
 }
 
+URLSearchParams.prototype.toMap = function () {
+	return Object.fromEntries(this.entries());
+}
+URLSearchParams.prototype.toArray = function () {
+	return [...this.entries()].map(([key, value]) => ({ key, value }));
+}
+
 // WHEN expression
 class WhenExpression {
 	#done;

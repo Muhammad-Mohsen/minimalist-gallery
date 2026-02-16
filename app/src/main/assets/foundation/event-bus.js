@@ -1,42 +1,29 @@
-var EventBus = (() => {
+class EventBus {
 
 	// the event `type`
-	const Type = {
+	static Type = {
 		BACK: 'back',
 		REQUEST_PERMISSION: 'requestPermission',
-		LIST_DIR: 'listDir',
+		LIST_FILES: 'listFiles',
 		VIEW_IMG: 'image',
-	}
+	};
 
 	// the event `target` (read: source)
-	const Target = {
-		MAIN: 'main',
-		ACTIVITY: 'activity',
-		PERMISSION_VIEW: 'permissionView',
-		EXPLORER_VIEW: 'explorerView',
-	}
+	static Target = {
+		JS: 'js',
+		NATIVE: 'native',
+	};
 
-	const subscribers = []; // a regular ol' array will do
+	static subscribers = []; // a regular ol' array will do
 
-	function subscribe(sub) { subscribers.push(sub); }
-	function unsubscribe(sub) { subscribers = subscribers.filter(s => s != sub); } // never gonna happen
+	static subscribe(sub) { this.subscribers.push(sub); }
+	static unsubscribe(sub) { this.subscribers = this.subscribers.filter(s => s != sub); } // never gonna happen
 
 	/**
 	 * @param {{ type: EventBus.type, target: EventBus.target, data?: any }} event - The event object.
 	 */
-	function dispatch(event, native) {
-		subscribers.forEach(callback => callback(event, native));
+	static dispatch(event, native = false) {
+		this.subscribers.forEach(callback => callback(event, native));
 		if (!native) window.IPC?.dispatch(JSON.stringify(event));
 	}
-
-	return {
-		Type,
-		Target,
-
-		subscribe,
-		unsubscribe,
-
-		dispatch,
-	}
-
-})();
+}
