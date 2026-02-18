@@ -40,7 +40,7 @@ class MainView extends HTMLElementBase {
 			})
 			.is(EventBus.Type.BACK, () => {
 				// if image, go back to explorer, otherwise, send it back
-				if (this.imageView.getAttribute.src) this.imageView.getAttribute.src = '';
+				if (this.imageView.src) document.startViewTransition(() => this.imageView.src = '');
 				else EventBus.dispatch({ type: EventBus.Type.BACK, target: EventBus.Target.JS });
 			})
 			.otherwise(() => {

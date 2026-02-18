@@ -27,7 +27,7 @@ explorer-view {
 		}
 		sub {
 			display: block;
-			margin-top: 12px;
+			margin-top: 8px;
 			color: var(--text-light);
 			font-size: 13px;
 		}
@@ -115,7 +115,7 @@ explorer-view {
 			display: flex;
 			align-items: center;
 			height: 48px;
-			padding: 0 16px 4px;
+			padding: 0 12px 1px;
 			border-radius: 50px;
 			color: var(--text-light);
 			font-size: 14px;
@@ -131,11 +131,18 @@ explorer-view {
 
 			&:empty { display: none; }
 		}
+
+		i {
+			display: flex !important;
+			align-items: center;
+			color: var(--text-light);
+			font-size: 20px;
+		}
 	}
 }
 
 @keyframes shrink-header {
-	100% {  margin-top: -25px; padding: 8px 12px; }
+	100% { margin-top: -21px; padding: 8px 12px; }
 }
 
 @keyframes toggle-title {

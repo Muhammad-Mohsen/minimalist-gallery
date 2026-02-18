@@ -30,13 +30,13 @@ class ExplorerView extends HTMLElementBase {
 
 	render(path, items) {
 		const basePath = state.debug ? '' : 'https://appassets.androidplatform.net/thumbnail/';
-		const parts = path.split('/');
+		const parts = path.split('/').filter(p => p);
 
 		const imageCount = items.filter(item => !item.isDirectory).length;
 
 		super.render(`
 			<header>
-				<h1 id="header">${parts[parts.length - 1]}</h1>
+				<h1 id="header">${parts[parts.length - 1] || '/'}</h1>
 				<sub l10n>${imageCount} ${imageCount == 1 ? 'Image' : 'Images'}</sub>
 				<actions>
 					<h2 id="selection-count"></h2>
@@ -66,37 +66,11 @@ class ExplorerView extends HTMLElementBase {
 					${
 						parts.map((part, index) => {
 							return `<button path="${parts.slice(0, index + 1).join('/')}" onclick="${this}.onCrumbClick(event)">${part}</button>`;
-						}).join('')
+						}).join('<i class="ic-chevron-right"></i>')
 					}
 				</crumb-list>
 			</breadcrumb-bar>
 		`);
-	}
-
-	renderItems(items) {
-		const basePath = state.debug ? '' : 'https://appassets.androidplatform.net/thumbnail/';
-
-		this.items.innerHTML = items.map(item => {
-			return item.isDirectory
-				? `
-					<button path="${item.path}" onclick="${this}.onItemClick(event)">
-						<i class="ic-folder"></i>
-						<span>${item.name}</span>
-					</button>
-				`
-				: `<img src="${basePath}${item.path}" loading="lazy" onclick="${this}.onItemClick(event)">`;
-		}).join('');
-	}
-
-	renderCrumbs(path) {
-		const parts = path.split('/');
-		this.crumbs.innerHTML = parts.map((part, index) => {
-			return `<button path="${parts.slice(0, index + 1).join('/')}" onclick="${this}.onCrumbClick(event)">${part}</button>`;
-		}).join('');
-
-		this.header.textContent = parts[parts.length - 1];
-
-		this.crumbs.scrollTo({ left: this.crumbs.scrollWidth });
 	}
 }
 

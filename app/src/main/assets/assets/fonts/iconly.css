@@ -57,3 +57,9 @@
 .ic-unlock:before {
 	content: "\e00b"
 }
+.ic-play:before {
+  content: "\e00c";
+}
+.ic-chevron-right:before {
+  content: "\e00d";
+}

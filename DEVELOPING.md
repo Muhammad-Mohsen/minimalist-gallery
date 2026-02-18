@@ -2,10 +2,18 @@
 ## Phase I
 - explorer
 	- empty view
+		(o^^)o
+		\(o_o)/
+		(^-^*)
+		(≥o≤)
+		(˚Δ˚)b
+		(='X'=)
+		(^_^)b
+
 	- search
 	- sort
 	- masonry layout
-	- fix root navigation
+	- DONE - fix root navigation
 	- DONE - thumbnail loading placeholder background-light + image icon
 	- DONE - tiff support? - nope
 	- DONE - folder subtitle
@@ -23,6 +31,23 @@
 			- name
 			- path
 			- size / resolution
+				```javascript
+					async function getImageSizeFromUrlRobust(imageUrl) {
+						const response = await fetch(imageUrl);
+						const blob = await response.blob();
+						const sizeInBytes = blob.size;
+						const sizeInKB = sizeInBytes / 1000;
+						console.log(`Image size: ${sizeInKB.toFixed(2)} KB`);
+						return sizeInKB;
+					}
+				```
+
+				```javascript
+					img.onload = function() {
+						const originalWidth = img.naturalWidth;
+						const originalHeight = img.naturalHeight;
+					}
+				```
 			- date
 	- carousel
 	- gestures
