@@ -163,7 +163,8 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 	private fun handleBackPress() {
 		onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
 			override fun handleOnBackPressed() {
-				dispatchBack()
+				EventBus.dispatch(Event(Type.BACK, Target.NATIVE))
+				// dispatchBack()
 			}
 		})
 	}
@@ -185,7 +186,7 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 
 	/* UTILS */
 	private fun dispatchListFiles() {
-		val items = FileCache.listFiles(State.path, State.sort)
+		val items = FileCache.listFiles(applicationContext, State.path, State.sort)
 		val data = mapOf(
 			"path" to State.path,
 			"items" to items.map { mapOf("name" to it.name, "path" to it.path, "isDirectory" to it.isDirectory) }

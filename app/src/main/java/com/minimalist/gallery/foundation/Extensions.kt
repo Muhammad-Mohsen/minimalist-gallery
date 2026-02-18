@@ -1,8 +1,10 @@
 package com.minimalist.gallery.foundation
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Environment
+import android.os.storage.StorageManager
 import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import com.minimalist.gallery.data.SortBy
@@ -59,15 +61,12 @@ fun JSONArray.toList(): List<Any> {
 val ROOT = "/"
 val EXTERNAL_STORAGE_PATH: String = Environment.getExternalStorageDirectory().path
 
-fun File?.isRoot(): Boolean {
-	return (this?.absolutePath?.filter { it == '/' }?.length ?: 1) <= 1
-}
 fun File.isImage(): Boolean {
 	return this.exists()
 			&& listOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "heic", "heif", "svg", "svgz", "ico")
 		.contains(this.extension.lowercase())
 }
-fun File.listFiles(sortBy: String): ArrayList<File> {
+fun File.listFiles(context: Context, sortBy: String): ArrayList<File> {
 	val fileModels = ArrayList<File>()
 
 	var files = listFiles { file ->
@@ -78,7 +77,7 @@ fun File.listFiles(sortBy: String): ArrayList<File> {
 	if (files == null) {
 		when (absolutePath) {
 			"/" -> files = arrayOf(File("/storage"))
-			"/storage" -> files = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) listVolumes() else arrayOf(File("/storage/emulated"))
+			"/storage" -> files = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) listVolumes(context) else arrayOf(File("/storage/emulated"))
 			"/storage/emulated" -> files = arrayOf(File("/storage/emulated/0"))
 		}
 	}
@@ -111,18 +110,13 @@ fun File.listFiles(sortBy: String): ArrayList<File> {
 // After the scoped storage changes, we can't access the SD card from "/storage".listFiles() anymore :)
 // this little guy returns them nonetheless
 @RequiresApi(Build.VERSION_CODES.R)
-private fun listVolumes(): Array<File> {
-//	val context = State.applicationContext
-//
-//	val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
-//	return ArrayList(storageManager.storageVolumes.mapNotNull {
-//		// leaving this as is, causes a minor navigation problem...we end up with the breadcrumbs looking like storage/0/0 when navigating
-//		if (it.directory?.absolutePath == "/storage/emulated/0") File("/storage/emulated")
-//		else it.directory
-//
-//	}).toTypedArray()
+private fun listVolumes(context: Context): Array<File> {
 
-	return Array(1) {
-		File("dummy_path")
-	}
+	val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+	return ArrayList(storageManager.storageVolumes.mapNotNull {
+		// leaving this as is, causes a minor navigation problem...we end up with the breadcrumbs looking like storage/0/0 when navigating
+		if (it.directory?.absolutePath == "/storage/emulated/0") File("/storage/emulated")
+		else it.directory
+
+	}).toTypedArray()
 }
