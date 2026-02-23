@@ -22,6 +22,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.minimalist.gallery.data.FileCache
 import com.minimalist.gallery.data.LocalAssetLoader
+import com.minimalist.gallery.data.SortBy
 import com.minimalist.gallery.data.State
 import com.minimalist.gallery.foundation.DispatchQueue
 import com.minimalist.gallery.foundation.EXTERNAL_STORAGE_PATH
@@ -154,6 +155,10 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 			Type.BACK -> dispatchBack()
 			Type.LIST_FILES -> {
 				State.path = event.data["path"] as? String ?: EXTERNAL_STORAGE_PATH
+				dispatchListFiles()
+			}
+			Type.SORT_BY -> {
+				State.sort = event.data["sort"] as? String ?: SortBy.AZ
 				dispatchListFiles()
 			}
 		}

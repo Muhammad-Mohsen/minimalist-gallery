@@ -15,8 +15,6 @@ image-view {
 		display: flex;
 		gap: 24px;
 
-		/* TODO setup scroll snapping */
-
 		img {
 			width: 100vw;
 			height: 100vh;
@@ -29,11 +27,7 @@ image-view {
 		display: flex;
 		overflow: auto;
 		img {
-
-		}
-
-		img.active {
-
+			/* TODO setup scroll snapping */
 		}
 	}
 

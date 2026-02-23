@@ -18,6 +18,8 @@ class MainView extends HTMLElementBase {
 
 		when(event.type)
 			.is(EventBus.Type.LIST_FILES, () => {
+				const direction = event.data.path.length > (state.path?.length || 0) ? 'forward' : 'back';
+
 				state.path = event.data.path;
 				state.items = event.data.items;
 
@@ -25,22 +27,28 @@ class MainView extends HTMLElementBase {
 					return document.startViewTransition(() => this.innerHTML = '<permission-view></permission-view>');
 				}
 
-				document.startViewTransition(() => {
-					this.innerHTML = `
-						<explorer-view onimgclick="${this}.onImageClick(event)"></explorer-view>
-						<image-view src=""></image-view>
-					`.minify();
+				document.startViewTransition({
+					update: () => {
+						this.innerHTML = `
+							<explorer-view></explorer-view>
+							<image-view src=""></image-view>
+						`.minify();
 
-					this.explorerView = this.querySelector('explorer-view');
-					this.explorerView.render(state.path, state.items);
+						this.explorerView = this.querySelector('explorer-view');
+						this.explorerView.render(state.path, state.items);
 
-					this.imageView = this.querySelector('image-view');
-					// this.imageView.render(state.items); // go ahead and set everything up!!
+						this.imageView = this.querySelector('image-view');
+						// this.imageView.render(state.items); // go ahead and set everything up!!
+					},
+					types: [direction],
 				});
 			})
 			.is(EventBus.Type.BACK, () => {
 				// if image, go back to explorer, otherwise, send it back
-				if (this.imageView.src) document.startViewTransition(() => this.imageView.src = '');
+				if (this.imageView.src) document.startViewTransition({
+					update: () => this.imageView.src = '',
+					types: ['back'],
+				});
 				else EventBus.dispatch({ type: EventBus.Type.BACK, target: EventBus.Target.JS });
 			})
 			.otherwise(() => {

@@ -1,30 +1,26 @@
 # Tasks
 ## Phase I
 - explorer
-	- empty view
-		(o^^)o
-		\(o_o)/
-		(^-^*)
-		(≥o≤)
-		(˚Δ˚)b
-		(='X'=)
-		(^_^)b
-
-	- search
-	- sort
-	- masonry layout
+	- fetch failures
+	- scroll handle
+	- DONE - sort dialog
+	- DONE - scroll snapping
+	- DONE - empty view
+	- DONE - error image to display on load error
+	- DONE - search
 	- DONE - fix root navigation
 	- DONE - thumbnail loading placeholder background-light + image icon
 	- DONE - tiff support? - nope
 	- DONE - folder subtitle
+	- DONE - view transitions
 
 - image-view
 	- DONE - check slop code
 	- DONE - display image
 	- full-screen toggle?
 		- don't think so...just because of the camera hole
+
 	- toolbars (center aligned)
-		- click to toggle
 		- DONE - back
 		- share
 		- info
@@ -49,14 +45,15 @@
 					}
 				```
 			- date
-	- carousel
+	- thumbnail carousel
 	- gestures
-		- left/right swipes
+		- left/right swipes?
 		- DONE - zooming
 		- DONE - rotating
 			- snap to 90deg within +-10deg
 		- transform origin: gesture mid-point
 		- double-click to reset transforms
+		- click to toggle toolbars
 
 - view transitions
 	- navigation
@@ -74,3 +71,10 @@
 - grid view options
 	- masonry
 	- uniform
+
+
+GET https://appassets.androidplatform.net/thumbnail/storage/emulated/0/Pictures/Vehicles/Chevy/Chevrolet%20Corvette%20C8%20GT3R%20(1).jpg net::ERR_CACHE_MISS
+
+GET https://appassets.androidplatform.net/thumbnail/storage/emulated/0/Pictures/Vehicles/Chevy/Chevrolet%20Corvette%20C8%20GT3R%20(2).jpg net::ERR_CACHE_MISS
+
+GET https://appassets.androidplatform.net/thumbnail/storage/emulated/0/Pictures/Vehicles/Chevy/Chevrolet%20Corvette%20C8%20GT3R%20(3).jpg net::ERR_CACHE_MISS

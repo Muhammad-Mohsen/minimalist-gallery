@@ -1,4 +1,8 @@
 explorer-view {
+	--header-height: 40vh;
+	--actions-height: 64px;
+	--animation-range: 40vh;
+
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
@@ -6,15 +10,18 @@ explorer-view {
 	timeline-scope: --grid-scroll;
 
 	header {
+		flex-shrink: 0;
 		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
 		width: 100%;
-		margin-bottom: 12px;
-		padding: 18vh 12px;
-		text-align: center;
+		height: var(--header-height);
 
 		animation: shrink-header linear both;
 		animation-timeline: --grid-scroll;
-		animation-range: 0 200px;
+		animation-range: 0 var(--animation-range);
 
 		h1, sub {
 			color: var(--text);
@@ -23,7 +30,7 @@ explorer-view {
 
 			animation: toggle-title linear reverse both;
 			animation-timeline: --grid-scroll;
-			animation-range: 0 200px;
+			animation-range: 0 164px;
 		}
 		sub {
 			display: block;
@@ -33,21 +40,21 @@ explorer-view {
 		}
 
 		h2 {
-			margin: 0 auto 4px 12px;
-			color: var(--text-light);
-			font: 300 20px / 1 system-ui;
+			margin: 0 auto 0 12px;
+			color: var(--text);
+			font: 300 20px / 1 PoiretOne;
 
 			animation: toggle-title linear both;
 			animation-timeline: --grid-scroll;
-			animation-range: 0 20%;
+			animation-range: 0 164px;
 		}
 
 		actions {
+			position: absolute;
+			inset: auto 12px 12px auto;
 			display: flex;
 			align-items: center;
 			gap: 8px;
-			position: absolute;
-			inset: auto 12px 0 12px;
 		}
 
 		button[icon] { background: transparent; }
@@ -62,6 +69,31 @@ explorer-view {
 		border-radius: 28px;
 		overflow-y: auto;
 		scroll-timeline: --grid-scroll y;
+
+		/* felt unnatural, used js instead */
+		/* scroll-snap-type: y mandatory;
+		& > * { scroll-snap-align: start; } */
+
+		&:empty {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 24px;
+			background: var(--background-light);
+
+			&::before, &::after {
+				content: '(^_^)'; /* (≥o≤) OR \(o_o)/ OR (o^^)o OR (^-^*) OR (='X'=) OR (˚Δ˚)b */
+				color: var(--text-light);
+				font: 400 64px / 1 system-ui;
+				opacity: .5;
+			}
+
+			&::after {
+				content: 'Folder is empty';
+				font-size: 14px;
+			}
+		}
 
 		button {
 			display: flex;
@@ -92,9 +124,13 @@ explorer-view {
 				url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" fill="none" stroke="%23555"/><rect x="13" y="7.5" width="3" height="3" rx="1.5" fill="none" stroke="%23555" stroke-miterlimit="10"/><polyline points="17.5 20.5 7.5 10.5 3.5 14.5" fill="none" stroke="%23555"/></svg>')
 				50% / 32px no-repeat;
 		}
+
+		> *:nth-child(1) { border-radius: 28px 4px 4px 4px; }
+		> *:nth-child(3) { border-radius: 4px 28px 4px 4px; }
 	}
 
-	breadcrumb-bar {
+	toolbar {
+		position: relative;
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
@@ -104,8 +140,11 @@ explorer-view {
 		background: var(--background-light);
 		margin: 12px;
 
+		view-transition-name: explorer-toolbar;
+
 		#crumbs {
 			display: flex;
+			padding-right: 12px;
 			overflow-x: auto;
 			scrollbar-width: none;
 		}
@@ -138,14 +177,63 @@ explorer-view {
 			color: var(--text-light);
 			font-size: 20px;
 		}
+
+		#search {
+			display: none;
+			position: absolute;
+			inset: 4px 4px 4px 54px;
+			padding: 0 0 2px 2px;
+			border: none;
+			outline: none;
+			color: var(--text);
+			background: var(--background-light);
+			font-size: 16px;
+
+			&.show { display: block; }
+		}
 	}
 }
 
+/* HEADER SCROLL ANIMATIONS */
 @keyframes shrink-header {
-	100% { margin-top: -21px; padding: 8px 12px; }
+	100% { height: var(--actions-height); }
+}
+@keyframes expand-grid {
+	100% { margin-top: var(--actions-height); }
 }
 
 @keyframes toggle-title {
 	0% { opacity: 0; }
 	100% { opacity: 1; }
+}
+
+/* VIEW TRANSITION */
+html:active-view-transition-type(forward) {
+	&::view-transition-old(root) { animation: .3s forward-out; }
+	&::view-transition-new(root) { animation: .4s forward-in; }
+}
+html:active-view-transition-type(back) {
+	&::view-transition-old(root) { animation: .3s forward-in reverse both; }
+	&::view-transition-new(root) { animation: .4s forward-out reverse both; }
+}
+
+@keyframes forward-in {
+	from {
+		translate: 100vw 0;
+		opacity: 0;
+	}
+	to {
+		translate: 0;
+		opacity: 1;
+	}
+}
+@keyframes forward-out {
+	from {
+		translate: 0;
+		opacity: 1;
+	}
+	to {
+		translate: -30vw;
+		opacity: 0;
+	}
 }
