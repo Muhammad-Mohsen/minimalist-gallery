@@ -2,7 +2,7 @@
 ## Phase I
 - explorer
 	- fetch failures
-	- scroll handle
+	- DONE - scroll handle
 	- DONE - sort dialog
 	- DONE - scroll snapping
 	- DONE - empty view

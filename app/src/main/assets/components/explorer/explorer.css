@@ -51,7 +51,7 @@ explorer-view {
 
 		actions {
 			position: absolute;
-			inset: auto 12px 12px auto;
+			inset: auto var(--safe-area) 12px auto;
 			display: flex;
 			align-items: center;
 			gap: 8px;
@@ -65,14 +65,11 @@ explorer-view {
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
 		gap: 4px;
-		margin: 0 12px;
+		margin: 0 var(--safe-area);
 		border-radius: 28px;
 		overflow-y: auto;
 		scroll-timeline: --grid-scroll y;
-
-		/* felt unnatural, used js instead */
-		/* scroll-snap-type: y mandatory;
-		& > * { scroll-snap-align: start; } */
+		scrollbar-width: none;
 
 		&:empty {
 			display: flex;
@@ -123,10 +120,45 @@ explorer-view {
 			background: var(--background-light)
 				url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" fill="none" stroke="%23555"/><rect x="13" y="7.5" width="3" height="3" rx="1.5" fill="none" stroke="%23555" stroke-miterlimit="10"/><polyline points="17.5 20.5 7.5 10.5 3.5 14.5" fill="none" stroke="%23555"/></svg>')
 				50% / 32px no-repeat;
+
+			transition: .3s;
+
+			&:active { scale: .9; }
 		}
 
 		> *:nth-child(1) { border-radius: 28px 4px 4px 4px; }
 		> *:nth-child(3) { border-radius: 4px 28px 4px 4px; }
+	}
+
+	scrollbar-track {
+		position: fixed;
+		inset: var(--header-height) 0 80px auto;
+		width: 24px;
+
+		scale: 0 1;
+		transform-origin: right;
+		transition: scale .3s;
+		&.show { scale: 1; }
+
+		scrollbar-thumb {
+			position: absolute;
+			height: 80px;
+			width: 100%;
+
+			&::before {
+				content: '';
+				display: block;
+				height: 100%;
+				width: 4px;
+				margin-inline-start: auto;
+				border-radius: 4px 0 0 4px;
+				background: var(--background-active);
+				transition: background .2s;
+			}
+
+			&:active { background: transparent; }
+			&.dragging::before { background: var(--text-light); }
+		}
 	}
 
 	toolbar {
@@ -134,13 +166,18 @@ explorer-view {
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
+		margin: 12px var(--safe-area);
 		padding: 4px;
 		border-radius: 28px;
 		overflow: hidden;
 		background: var(--background-light);
-		margin: 12px;
 
-		view-transition-name: explorer-toolbar;
+		/* view-transition-name: explorer-toolbar; */
+
+		#back-button {
+			/* a smaller size without compromizing the click area */
+			background: radial-gradient(var(--background-active) 20px, var(--background-light) 20px);
+		}
 
 		#crumbs {
 			display: flex;
@@ -181,13 +218,13 @@ explorer-view {
 		#search {
 			display: none;
 			position: absolute;
-			inset: 4px 4px 4px 54px;
-			padding: 0 0 2px 2px;
+			inset: 4px 4px 4px 50px;
+			padding-left: 8px;
 			border: none;
 			outline: none;
 			color: var(--text);
 			background: var(--background-light);
-			font-size: 16px;
+			font-size: 14px;
 
 			&.show { display: block; }
 		}

@@ -102,6 +102,7 @@ class ExplorerView extends HTMLElementBase {
 					}).join('')
 				}
 			</grid>
+			<scrollbar-track><scrollbar-thumb></scrollbar-thumb></scrollbar-track>
 
 			<toolbar>
 				<button icon class="ic-arrow-left" id="back-button" onclick="${this}.onBackClick()"></button>
@@ -140,12 +141,73 @@ class ExplorerView extends HTMLElementBase {
 
 		this.searchField = this.querySelector('#search');
 
+		this.#renderScrollbar(this.grid, this.querySelector('scrollbar-thumb'));
+
 		// css scroll snapping felt unnatural
 		// this.grid.onscrollend = () => {
 		// 	if (this.grid.scrollTop >= 200) return;
 		// 	this.grid.scrollTo({ top: this.grid.scrollTop < 50 ? 0 : 200, behavior: 'smooth' });
 		// };
 
+	}
+
+	#renderScrollbar(element, thumb) {
+		const HIDE_DELAY = 2000;
+		let hideTimeout;
+
+		let ticking = false;
+
+		let dragging = false;
+		let startTouch = 0;
+		let startScroll = 0;
+
+		const track = thumb.parentElement;
+
+		// the full-header height is added to the clientHeight (minus the actions height) as the header collapses on scroll
+		const scrollableHeight = element.scrollHeight - (element.clientHeight + document.body.clientHeight * .4 - 64);
+		const trackHeight = track.clientHeight - 80; // 80 is the thumb height
+
+		const updateThumbPosition = () => {
+			const scrollTop = element.scrollTop;
+
+			// Calculate the thumb's vertical position
+			const thumbPosition = scrollTop / scrollableHeight * trackHeight;
+			thumb.style.transform = `translateY(${thumbPosition}px)`;
+		}
+
+		// touch handlers
+		thumb.ontouchstart = (event) => {
+			startTouch = event.touches[0].clientY;
+			startScroll = element.scrollTop;
+			dragging = true;
+			thumb.className = 'dragging';
+		}
+		thumb.ontouchmove = (event) => {
+			if (!dragging) return;
+
+			const delta = event.touches[0].clientY - startTouch;
+			element.scrollTop = startScroll + delta / trackHeight * scrollableHeight;
+		}
+		thumb.ontouchend = () => {
+			dragging = false;
+			thumb.className = '';
+		}
+
+		// scroll handlers
+		element.onscroll = () => {
+			if (ticking) return;
+
+			ticking = true;
+			requestAnimationFrame(() => {
+				track.classList.add('show');
+				updateThumbPosition();
+				ticking = false;
+			});
+		}
+		element.onscrollend = () => {
+			clearTimeout(hideTimeout);
+			hideTimeout = setTimeout(() => track.classList.remove('show'), HIDE_DELAY)
+		};
 	}
 }
 
