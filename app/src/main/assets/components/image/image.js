@@ -16,7 +16,7 @@ class ImageView extends HTMLElementBase {
 			scale: 1,
 		}
 		this.gesture = {
-			initial: {},
+			initialTransform: {},
 			distance: 0,
 			angle: 0,
 
@@ -27,7 +27,16 @@ class ImageView extends HTMLElementBase {
 		}
 	}
 
-	// CLICK/DBL_CLICK
+	// IMG
+	onImageLoad(img) {
+		state.image.width = img.naturalWidth;
+		state.image.height = img.naturalHeight;
+
+		this.querySelector('info').innerHTML = `
+			<h1>${state.image.name}</h1>
+			<span>${state.image.width}x${state.image.height}</span>
+		`;
+	}
 	onImageClick() {
 
 	}
@@ -50,7 +59,7 @@ class ImageView extends HTMLElementBase {
 
 	// TOUCH
 	onTouchStart(e) {
-		this.gesture.initial = JSON.copy(this.transform);
+		this.gesture.initialTransform = JSON.copy(this.transform);
 		this.gesture.touches = e.touches.length;
 		this.gesture.timestamp = Date.now();
 
@@ -84,13 +93,15 @@ class ImageView extends HTMLElementBase {
 			const scaleChange = currentDistance / this.gesture.distance;
 			const angleChange = currentAngle - this.gesture.angle;
 
-			this.transform.scale = this.gesture.initial.scale * scaleChange;
-			this.transform.rotate = this.gesture.initial.rotate + angleChange;
-
+			this.transform.scale = this.gesture.initialTransform.scale * scaleChange;
+			this.transform.rotate = this.gesture.initialTransform.rotate + angleChange;
+			//
+			// yada, yada, yada...
+			//
 			// Calculate new translation to keep the "gesture center" fixed
 			// Vector from Initial Origin to Initial Center
-			const vX = this.gesture.center.x - this.gesture.initial.x;
-			const vY = this.gesture.center.y - this.gesture.initial.y;
+			const vX = this.gesture.center.x - this.gesture.initialTransform.x;
+			const vY = this.gesture.center.y - this.gesture.initialTransform.y;
 
 			// Rotate vector
 			const rad = angleChange * Math.PI / 180;
@@ -106,14 +117,16 @@ class ImageView extends HTMLElementBase {
 			// New Origin = CurrentCenter - NewVector
 			this.transform.x = currentCenter.x - sX;
 			this.transform.y = currentCenter.y - sY;
-
+			//
+			// ...we got something that works
+			//
 			img.style.scale = this.transform.scale;
 			img.style.rotate = this.transform.rotate + 'deg';
 			img.style.translate = `${this.transform.x}px ${this.transform.y}px`;
 		}
 		else if (e.touches.length == 1) {
-			this.transform.x = this.gesture.initial.x + e.touches[0].clientX - this.gesture.x;
-			this.transform.y = this.gesture.initial.y + e.touches[0].clientY - this.gesture.y;
+			this.transform.x = this.gesture.initialTransform.x + e.touches[0].clientX - this.gesture.x;
+			this.transform.y = this.gesture.initialTransform.y + e.touches[0].clientY - this.gesture.y;
 
 			img.style.translate = `${this.transform.x}px ${this.transform.y}px`;
 		}
@@ -129,7 +142,9 @@ class ImageView extends HTMLElementBase {
 	}
 
 	render() {
-		// const item = state.items.find(i => i.path.split('/').pop() == this.src.split('/').pop());
+		state.image = state.items.find(i => i.path.split('/').pop() == this.src.split('/').pop());
+
+		const images = state.items.filter(i => !i.isDirectory);
 
 		// <info-bar id="infoBar">
 		// 		<h1>${item.name}</h1>
@@ -138,22 +153,26 @@ class ImageView extends HTMLElementBase {
 		// 		<time>date</time>
 		// 	</info-bar>
 		super.render(`
+			<header>
+				<h1>${state.image.name}</h1>
+
+			</header>
 			<image-carousel id="imageCarousel" ontouchstart="${this}.onTouchStart(event);" ontouchmove="${this}.onTouchMove(event);" ontouchend="${this}.onTouchEnd(event);">
-				<img src="${this.src.replace('/thumbnail', '/file')}" style="transform-origin: 0 0" loading="lazy" ondblclick="${this}.onImageDblClick(this)">
+				<img src="${BASE_IMG_PATH}${state.image.path}" style="transform-origin: 0 0" onload="${this}.onImageLoad(this)" ondblclick="${this}.onImageDblClick(this)">
 			</image-carousel>
 
-			<thumbnail-carousel id="thumbnail-carousel"></thumbnail-carousel>
+			<thumbnail-carousel id="thumbnail-carousel">
+				${images.map(i => `<img src="${BASE_THUMB_PATH}${i.path}" loading="lazy" onclick="${this}.onThumbnailClick(this)">`).join('')}
+			</thumbnail-carousel>
 
 			<toolbar>
-				<button icon class="ic-arrow-left" onclick="${this}.onBackClick()"></button>
-				<button icon class="ic-share"></button>
-				<button icon class="ic-pencil"></button>
+				<button id="back-button" icon class="ic-arrow-left" onclick="${this}.onBackClick()"></button>
+				<info></info>
 			</toolbar>
 		`);
 	}
 
 	renderImages(items) {
-		const basePath = state.debug ? '' : 'https://appassets.androidplatform.net/file/';
 		// this.imageCarousel.innerHTML = items
 		// 	.filter(i => !i.isDirectory)
 		// 	.map(i => `<img src="${basePath}${i.path}" loading="lazy" ondblclick="${this}.onImageDblClick(this)">`)

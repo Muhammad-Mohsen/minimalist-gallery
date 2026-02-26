@@ -5,6 +5,9 @@ class MainView extends HTMLElementBase {
 		window.state = new URLSearchParams(location.search).toMap();
 		EventBus.subscribe(this.handler.bind(this));
 
+		window.BASE_IMG_PATH = state.debug ? '' : 'https://appassets.androidplatform.net/file/';
+		window.BASE_THUMB_PATH = state.debug ? '' : 'https://appassets.androidplatform.net/thumbnail/';
+
 		if (state.path == '<permission>') {
 			document.startViewTransition(() => this.innerHTML = '<permission-view></permission-view>');
 		}

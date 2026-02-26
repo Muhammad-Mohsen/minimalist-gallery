@@ -6,11 +6,6 @@ image-view {
 
 	&[src=""] { display: none; }
 
-	info-bar {
-		position: fixed;
-		inset: 0 0 auto;
-	}
-
 	image-carousel {
 		display: flex;
 		gap: 24px;
@@ -36,9 +31,29 @@ image-view {
 		inset: auto auto 12px 50%;
 		translate: -50% 0;
 		display: flex;
+		align-items: center;
 		gap: 8px;
-		padding: 4px;
+		padding: 4px 24px 4px 4px;
 		border-radius: 28px;
 		background: var(--background-light);
+
+		#back-button {
+			flex-shrink: 0;
+			background: radial-gradient(var(--background-active) 20px, var(--background-light) 20px);
+		}
+		info {
+			h1, span {
+				max-width: 70vw;
+				color: var(--text);
+				font: 400 18px / 1 system-ui;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				overflow: hidden;
+			}
+			span {
+				color: var(--text-light);
+				font: 400 12px / 1 system-ui;
+			}
+		}
 	}
 }

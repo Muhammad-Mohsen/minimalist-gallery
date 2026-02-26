@@ -25,7 +25,7 @@ explorer-view {
 
 		h1, sub {
 			color: var(--text);
-			font: 300 36px / 1 PoiretOne;
+			font: 500 40px / 1 system-ui;
 			text-align: center;
 
 			animation: toggle-title linear reverse both;
@@ -36,13 +36,13 @@ explorer-view {
 			display: block;
 			margin-top: 8px;
 			color: var(--text-light);
-			font-size: 13px;
+			font: 400 13px / 1 system-ui;
 		}
 
 		h2 {
 			margin: 0 auto 0 12px;
 			color: var(--text);
-			font: 300 20px / 1 PoiretOne;
+			font: 400 20px / 1 system-ui;
 
 			animation: toggle-title linear both;
 			animation-timeline: --grid-scroll;

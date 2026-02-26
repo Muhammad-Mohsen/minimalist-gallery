@@ -1,5 +1,3 @@
-window.navigator.isIPC = window.IPC;
-
 String.prototype.htmlEncode = function () {
 	return this.replace(/[&<>'"]/g,
 		tag => ({

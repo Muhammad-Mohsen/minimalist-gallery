@@ -71,7 +71,6 @@ class ExplorerView extends HTMLElementBase {
 	}
 
 	render(path, items) {
-		const assetsPath = state.debug ? '' : 'https://appassets.androidplatform.net/thumbnail/';
 		const parts = path.split('/').filter(p => p);
 
 		const imageCount = items.filter(item => !item.isDirectory).length;
@@ -98,7 +97,7 @@ class ExplorerView extends HTMLElementBase {
 									<span>${item.name}</span>
 								</button>
 							`
-							: `<img src="${assetsPath}${item.path}" name="${item.name}" loading="lazy" onerror="${this}.onThumbnailError(this)" onclick="${this}.onItemClick(event)">`;
+							: `<img src="${BASE_THUMB_PATH}${item.path}" name="${item.name}" loading="lazy" onerror="${this}.onThumbnailError(this)" onclick="${this}.onItemClick(event)">`;
 					}).join('')
 				}
 			</grid>
@@ -106,13 +105,13 @@ class ExplorerView extends HTMLElementBase {
 
 			<toolbar>
 				<button icon class="ic-arrow-left" id="back-button" onclick="${this}.onBackClick()"></button>
-				<crumb-list id="crumbs">
+				<nav id="crumbs">
 					${
 						parts.map((part, index) => {
 							return `<button path="${parts.slice(0, index + 1).join('/')}" onclick="${this}.onCrumbClick(event)">${part}</button>`;
 						}).join('<i class="ic-chevron-right"></i>')
 					}
-				</crumb-list>
+				</nav>
 				<input type="text" id="search" placeholder="Search" oninput="${this}.onSearchInput(this.value)">
 			</toolbar>
 
