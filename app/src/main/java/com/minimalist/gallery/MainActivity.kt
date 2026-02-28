@@ -20,17 +20,16 @@ import androidx.core.graphics.createBitmap
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import com.minimalist.gallery.data.FileCache
+import com.minimalist.gallery.data.FileSystem
 import com.minimalist.gallery.data.LocalAssetLoader
 import com.minimalist.gallery.data.SortBy
 import com.minimalist.gallery.data.State
 import com.minimalist.gallery.foundation.DispatchQueue
-import com.minimalist.gallery.foundation.EXTERNAL_STORAGE_PATH
+import com.minimalist.gallery.data.EXTERNAL_STORAGE_PATH
 import com.minimalist.gallery.foundation.EventBus
 import com.minimalist.gallery.foundation.EventBus.Event
 import com.minimalist.gallery.foundation.EventBus.Target
 import com.minimalist.gallery.foundation.EventBus.Type
-import java.io.File
 
 class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 	private var webView: WebView? = null
@@ -191,22 +190,29 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 
 	/* UTILS */
 	private fun dispatchListFiles() {
-		val items = FileCache.listFiles(applicationContext, State.path, State.sort)
+		val items = FileSystem.listFiles(applicationContext, State.path, State.sort)
 		val data = mapOf(
 			"path" to State.path,
-			"items" to items.map { mapOf("name" to it.name, "path" to it.path, "isDirectory" to it.isDirectory) }
+			"items" to items.map {
+				mapOf(
+					"name" to it.name,
+					"path" to it.path,
+					"isDirectory" to it.isDirectory,
+					"size" to it.size / 1024.0,
+					"resolution" to it.resolution,
+					"date" to it.date,
+				)
+			}
 		)
 
 		EventBus.dispatch(Event(Type.LIST_FILES, Target.NATIVE, data))
 	}
 	private fun dispatchBack() {
-		val current = File(State.path)
-		val parent = current.parent
+		val parent = State.path.substringBeforeLast('/', "")
 
-		if (parent == null) {
+		if (parent.isEmpty()) {
 			moveTaskToBack(true)
-		}
-		else {
+		} else {
 			State.path = parent
 			dispatchListFiles()
 		}

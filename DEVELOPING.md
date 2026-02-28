@@ -13,6 +13,7 @@
 	- DONE - tiff support? - nope
 	- DONE - folder subtitle
 	- DONE - view transitions
+	- DONE - MediaStore!!!
 
 - image-view
 	- DONE - check slop code
@@ -24,35 +25,17 @@
 		- DONE - back
 		- share
 		- info
-			- name
-			- path
-			- size / resolution
-				```javascript
-					async function getImageSizeFromUrlRobust(imageUrl) {
-						const response = await fetch(imageUrl);
-						const blob = await response.blob();
-						const sizeInBytes = blob.size;
-						const sizeInKB = sizeInBytes / 1000;
-						console.log(`Image size: ${sizeInKB.toFixed(2)} KB`);
-						return sizeInKB;
-					}
-				```
-
-				```javascript
-					img.onload = function() {
-						const originalWidth = img.naturalWidth;
-						const originalHeight = img.naturalHeight;
-					}
-				```
-			- date
-	- thumbnail carousel
+			- DONE - name
+			- DONE - size / resolution
+			- DONE - date
+	- DONE - thumbnail carousel
 	- gestures
 		- left/right swipes?
 		- DONE - zooming
 		- DONE - rotating
 			- snap to 90deg within +-10deg
-		- transform origin: gesture mid-point
-		- double-click to reset transforms
+		- DONE - transform origin: gesture mid-point
+		- DONE - double-click to reset transforms
 		- click to toggle toolbars
 
 - view transitions

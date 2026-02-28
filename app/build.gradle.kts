@@ -64,6 +64,5 @@ android {
 dependencies {
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.appcompat)
-	implementation(libs.glide)
 	implementation(libs.androidx.webkit)
 }
