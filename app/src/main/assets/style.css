@@ -1,17 +1,10 @@
-@font-face {
-	font-family: "PoiretOne";
-	font-style: normal;
-	font-weight: normal;
-	src: url("assets/fonts/PoiretOne-Regular.woff2");
-}
-
 :root {
 	--safe-area: 20px;
 
 	--background: #000;
 	--background-light: #191919; /* 151515 */
 	--background-active: #333;
-	--background-translucent: #2223;
+	--background-translucent: #00000080;
 	--text: #f2f2f2;
 	--text-light: #828282;
 
@@ -20,8 +13,9 @@
 @media (prefers-color-scheme: light) {
 	:root {
 		--background: #DDD;
-		--background-light: #fff;
-		--background-translucent: #eee3;
+		--background-light: #FFF;
+		--background-active: #DDD;
+		--background-translucent: #FFFFFF80;
 		--text: #000;
 		--text-light: #33333399;
 		--accent: #AAA;

@@ -25,7 +25,7 @@ explorer-view {
 
 		h1, sub {
 			color: var(--text);
-			font: 500 40px / 1 system-ui;
+			font: 500 36px / 1 system-ui;
 			text-align: center;
 
 			animation: toggle-title linear reverse both;
@@ -63,6 +63,7 @@ explorer-view {
 	grid {
 		flex-grow: 1;
 		display: grid;
+		place-content: start;
 		grid-template-columns: 1fr 1fr 1fr;
 		gap: 4px;
 		margin: 0 var(--safe-area);
@@ -219,7 +220,7 @@ explorer-view {
 			display: none;
 			position: absolute;
 			inset: 4px 4px 4px 50px;
-			padding-left: 8px;
+			padding-left: 16px;
 			border: none;
 			outline: none;
 			color: var(--text);
@@ -246,12 +247,12 @@ explorer-view {
 
 /* VIEW TRANSITION */
 html:active-view-transition-type(forward) {
-	&::view-transition-old(root) { animation: .3s forward-out; }
-	&::view-transition-new(root) { animation: .4s forward-in; }
+	&::view-transition-old(root) { animation: .2s forward-out; }
+	&::view-transition-new(root) { animation: .3s forward-in; }
 }
 html:active-view-transition-type(back) {
-	&::view-transition-old(root) { animation: .3s forward-in reverse both; }
-	&::view-transition-new(root) { animation: .4s forward-out reverse both; }
+	&::view-transition-old(root) { animation: .2s forward-in reverse both; }
+	&::view-transition-new(root) { animation: .3s forward-out reverse both; }
 }
 
 @keyframes forward-in {

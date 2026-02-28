@@ -27,7 +27,19 @@ String.prototype.toElement = function () {
 String.prototype.minify = function () {
 	return this.replace(/\t|\n/g, '').replace(/\s{2,}/g, ' ').replace(/<script/gi, '&lt;script');
 }
+String.prototype.toSize = function () {
+	return parseInt(this).toSize();
+}
+String.prototype.encodedName = function () {
+	return this.split('/').pop().replace(/ /g, '%20');
+}
+Number.prototype.toSize = function () {
+	const k = 1024;
+	const sizes = ['KB', 'MB', 'GB', 'TB'];
 
+	const i = Math.floor(Math.log(this) / Math.log(k));
+	return (this / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+}
 Array.prototype.unique = function () {
 	return [...new Set(this)];
 }
@@ -43,16 +55,16 @@ Date.prototype.format = function (format, isLocal) {
 	var daysShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 	var yyyy = isLocal ? this.getFullYear() : this.getUTCFullYear();
-	var MM = isLocal ? this.getMonth() : this.getUTCMonth();
-	var MMM = monthsShort[MM];
+	var MM = (isLocal ? this.getMonth() + 1 : this.getUTCMonth()) + 1; // actual value
+	var MMM = monthsShort[MM - 1]; // back to indexes :)
 
 	var dd = isLocal ? this.getDate() : this.getUTCDate();
 
-	var hh = (isLocal ? this.getHours() : this.getUTCHours()).toString().padStart(2, '0');
-	var HH = (hh % 12 || 12).toString().padStart(2, '0');
-	var mm = (isLocal ? this.getMinutes() : this.getUTCMinutes()).toString().padStart(2, '0');
-	var ss = (isLocal ? this.getSeconds() : this.getUTCSeconds()).toString().padStart(2, '0');
-	var sss = isLocal ? this.getMilliseconds() : this.getUTCMilliseconds().toString().padStart(3, '0');
+	var hh = isLocal ? this.getHours() : this.getUTCHours();
+	var HH = hh % 12 || 12;
+	var mm = isLocal ? this.getMinutes() : this.getUTCMinutes();
+	var ss = isLocal ? this.getSeconds() : this.getUTCSeconds();
+	var sss = isLocal ? this.getMilliseconds() : this.getUTCMilliseconds();
 
 	var tt = hh / 12 ? 'pm' : 'am';
 	var TT = tt.toUpperCase();
@@ -60,14 +72,14 @@ Date.prototype.format = function (format, isLocal) {
 	return format
 		.replace('yyyy', yyyy)
 		.replace('MMM', MMM)
-		.replace('MM', MM)
+		.replace('MM', MM.toString().padStart(2, '0'))
 		.replace('dd', dd.toString().padStart(2, '0'))
 		.replace('d', dd)
-		.replace('hh', hh)
-		.replace('HH', HH)
-		.replace('mm', mm)
-		.replace('sss', sss)
-		.replace('ss', ss)
+		.replace('hh', hh.toString().padStart(2, '0'))
+		.replace('HH', HH.toString().padStart(2, '0'))
+		.replace('mm', mm.toString().padStart(2, '0'))
+		.replace('sss', sss.toString().padStart(3, '0'))
+		.replace('ss', ss.toString().padStart(2, '0'))
 		.replace('tt', tt)
 		.replace('TT', TT)
 }

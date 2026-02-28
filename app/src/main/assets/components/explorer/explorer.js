@@ -162,6 +162,9 @@ class ExplorerView extends HTMLElementBase {
 
 		const track = thumb.parentElement;
 
+		// don't bother creating a scrollbar for shortish content
+		if (element.scrollHeight < document.body.clientHeight * 2) return;
+
 		// the full-header height is added to the clientHeight (minus the actions height) as the header collapses on scroll
 		const scrollableHeight = element.scrollHeight - (element.clientHeight + document.body.clientHeight * .4 - 64);
 		const trackHeight = track.clientHeight - 80; // 80 is the thumb height

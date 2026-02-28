@@ -7,47 +7,37 @@ class ImageView extends HTMLElementBase {
 		this.setAttribute('src', value);
 		if (!value) return;
 
+		state.image = this.findImage(value);
 		this.render();
 
-		this.transform = {
-			x: 0,
-			y: 0,
-			rotate: 0,
-			scale: 1,
-		}
-		this.gesture = {
-			initialTransform: {},
-			distance: 0,
-			angle: 0,
-
-			x: 0,
-			y: 0,
-
-			touches: 0,
-		}
+		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
+		this.gesture = {}
 	}
 
 	// IMG
-	onImageLoad(img) {
-		state.image.width = img.naturalWidth;
-		state.image.height = img.naturalHeight;
-
-		this.querySelector('info').innerHTML = `
-			<h1>${state.image.name}</h1>
-			<span>${state.image.width}x${state.image.height}</span>
-		`;
-	}
 	onImageClick() {
-
+		this.toolbar.classList.toggle('hidden');
+		this.thumbnailCarousel.classList.toggle('hidden');
 	}
 	onImageDblClick(img) {
-		this.transform = {
-			x: 0,
-			y: 0,
-			rotate: 0,
-			scale: 1
-		}
+		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
 		img.style.translate = img.style.rotate = img.style.scale = '';
+	}
+	onThumbnailClick(img) {
+		// update state
+		state.image = this.findImage(img.src);
+
+		// update image
+		const mainImage = this.querySelector('image-carousel img');
+		mainImage.src = BASE_IMG_PATH + state.image.path;
+		this.onImageDblClick(mainImage);
+
+		// update thumbnail
+		this.querySelector('thumbnail-carousel img.active')?.removeClass('active');
+		img.addClass('active').scrollIntoView({ inline: 'center', behavior: 'smooth' });
+
+		// update info
+		this.info.innerHTML = this.#renderInfo();
 	}
 
 	onBackClick() {
@@ -58,10 +48,10 @@ class ImageView extends HTMLElementBase {
 	}
 
 	// TOUCH
-	onTouchStart(e) {
+	onTouchStart(e, timestamp = Date.now()) {
 		this.gesture.initialTransform = JSON.copy(this.transform);
 		this.gesture.touches = e.touches.length;
-		this.gesture.timestamp = Date.now();
+		this.gesture.timestamp = timestamp;
 
 		if (e.touches.length == 2) {
 			this.gesture.distance = this.distance(e.touches[0], e.touches[1]);
@@ -73,12 +63,11 @@ class ImageView extends HTMLElementBase {
 			this.gesture.y = e.touches[0].clientY;
 		}
 	}
-
 	onTouchMove(e) {
 		const img = this.imageCarousel.children[0];
 
 		if (e.touches.length != this.gesture.touches) {
-			this.onTouchStart(e);
+			this.onTouchStart(e, this.gesture.timestamp); // maintain the original touchstart timestamp
 			return;
 		}
 
@@ -118,7 +107,7 @@ class ImageView extends HTMLElementBase {
 			this.transform.x = currentCenter.x - sX;
 			this.transform.y = currentCenter.y - sY;
 			//
-			// ...we got something that works
+			// ...we get something that works!
 			//
 			img.style.scale = this.transform.scale;
 			img.style.rotate = this.transform.rotate + 'deg';
@@ -131,49 +120,44 @@ class ImageView extends HTMLElementBase {
 			img.style.translate = `${this.transform.x}px ${this.transform.y}px`;
 		}
 	}
-
 	onTouchEnd(e) {
-		const time = Date.now() - this.gesture.timestamp;
-		if (time < 300) return;
+		if (Date.now() - this.gesture.timestamp < 150 // quick tap
+			&& this.distance(e.changedTouches[0], { clientX: this.gesture.x, clientY: this.gesture.y }) < 10) { // not a flick
 
-		if (this.gesture.touches == 1) {
 			this.onImageClick();
 		}
 	}
 
 	render() {
-		state.image = state.items.find(i => i.path.split('/').pop() == this.src.split('/').pop());
-
-		const images = state.items.filter(i => !i.isDirectory);
-
-		// <info-bar id="infoBar">
-		// 		<h1>${item.name}</h1>
-		// 		<span>${item.path}</span>
-		// 		<span>${item.width}x${item.height}</span><span>${item.size}</span>
-		// 		<time>date</time>
-		// 	</info-bar>
 		super.render(`
-			<header>
-				<h1>${state.image.name}</h1>
-
-			</header>
 			<image-carousel id="imageCarousel" ontouchstart="${this}.onTouchStart(event);" ontouchmove="${this}.onTouchMove(event);" ontouchend="${this}.onTouchEnd(event);">
-				<img src="${BASE_IMG_PATH}${state.image.path}" style="transform-origin: 0 0" onload="${this}.onImageLoad(this)" ondblclick="${this}.onImageDblClick(this)">
+				<img src="${BASE_IMG_PATH}${state.image.path}" style="transform-origin: 0 0" loading="lazy" ondblclick="${this}.onImageDblClick(this)">
 			</image-carousel>
 
 			<thumbnail-carousel id="thumbnail-carousel">
-				${images.map(i => `<img src="${BASE_THUMB_PATH}${i.path}" loading="lazy" onclick="${this}.onThumbnailClick(this)">`).join('')}
+				${state.items
+					.filter(i => !i.isDirectory)
+					.map(i => `<img src="${BASE_THUMB_PATH}${i.path}" loading="lazy" onclick="${this}.onThumbnailClick(this)">`)
+					.join('')
+				}
 			</thumbnail-carousel>
 
-			<toolbar>
+			<toolbar id="toolbar">
 				<button id="back-button" icon class="ic-arrow-left" onclick="${this}.onBackClick()"></button>
-				<info></info>
+				<info id="info">
+					${this.#renderInfo()}
+				</info>
 			</toolbar>
 		`);
-	}
 
-	renderImages(items) {
-		// this.imageCarousel.innerHTML = items
+		// Mark active thumbnail & scroll it into center
+		const thumbs = [...this.querySelectorAll('thumbnail-carousel img')];
+		thumbs.find(t => t.src.encodedName() == state.image.path.encodedName())
+			.addClass('active')
+			.scrollIntoView({ inline: 'center', behavior: 'instant' });
+	}
+	#renderImages() {
+		// return state.items
 		// 	.filter(i => !i.isDirectory)
 		// 	.map(i => `<img src="${basePath}${i.path}" loading="lazy" ondblclick="${this}.onImageDblClick(this)">`)
 		// 	.join('');
@@ -181,11 +165,18 @@ class ImageView extends HTMLElementBase {
 		// const currentPath = this.src.split('/').pop();
 		// this.imageCarousel.querySelector(`[src="${basePath}${currentPath}"]`).scrollIntoView();
 
-		this.imageCarousel.innerHTML = `<img src="${this.src.replace('/thumbnail', '/file')}" style="transform-origin: 0 0" loading="lazy" ondblclick="${this}.onImageDblClick(this)">`
+		return `<img src="${BASE_IMG_PATH}${state.image.path}" style="transform-origin: 0 0" loading="lazy" onclick="${this}.onImageClick(this)" ondblclick="${this}.onImageDblClick(this)">`
 	}
 
-	renderInfo(item) {
+	#renderInfo() {
+		return `
+			<h1>${state.image.name}</h1>
+			<span>${state.image.resolution} <separator></separator> ${state.image.size.toSize()} <separator></separator> ${new Date(state.image.date * 1000).format('dd MMM yyyy HH:mm')}</span>
+		`;
+	}
 
+	findImage(src, within = state.items) {
+		return within.find(i => i.path.encodedName() == src.encodedName());
 	}
 
 	distance(p1, p2) {
