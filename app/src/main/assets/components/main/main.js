@@ -55,7 +55,7 @@ class MainView extends HTMLElementBase {
 					update: () => this.imageView.src = '',
 					types: ['back'],
 				});
-				else EventBus.dispatch({ type: EventBus.Type.BACK, target: EventBus.Target.JS });
+				else this.explorerView.onBackClick();
 			})
 			.otherwise(() => {
 				console.log('Unknown event', event);

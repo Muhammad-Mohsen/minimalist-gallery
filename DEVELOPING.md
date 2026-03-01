@@ -1,7 +1,10 @@
 # Tasks
 ## Phase I
+- fetch failures
+- image carousel + left/right flicks
+- performance revisited
+
 - explorer
-	- fetch failures
 	- DONE - scroll handle
 	- DONE - sort dialog
 	- DONE - scroll snapping
@@ -14,6 +17,8 @@
 	- DONE - folder subtitle
 	- DONE - view transitions
 	- DONE - MediaStore!!!
+		- DONE - navigation failures: virtual roots + clicking on the crumbs
+
 
 - image-view
 	- DONE - check slop code
@@ -30,13 +35,13 @@
 			- DONE - date
 	- DONE - thumbnail carousel
 	- gestures
-		- left/right swipes?
+		- left/right flicks
 		- DONE - zooming
 		- DONE - rotating
 			- snap to 90deg within +-10deg
 		- DONE - transform origin: gesture mid-point
 		- DONE - double-click to reset transforms
-		- click to toggle toolbars
+		- DONE - click to toggle toolbars
 
 - view transitions
 	- navigation
