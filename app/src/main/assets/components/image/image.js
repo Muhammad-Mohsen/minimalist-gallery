@@ -59,6 +59,8 @@ class ImageView extends HTMLElementBase {
 			this.gesture.center = this.center(e.touches[0], e.touches[1]);
 		}
 		else if (e.touches.length == 1) {
+			this.gesture.ignore = e.touches[0].clientX < SAFE_AREA_LEFT || e.touches[0].clientX > SAFE_AREA_RIGHT;
+
 			this.gesture.x = e.touches[0].clientX;
 			this.gesture.y = e.touches[0].clientY;
 		}
@@ -70,6 +72,8 @@ class ImageView extends HTMLElementBase {
 			this.onTouchStart(e, this.gesture.timestamp); // maintain the original touchstart timestamp
 			return;
 		}
+
+		if (this.gesture.ignore) return;
 
 		if (e.touches.length == 2) {
 			e.preventDefault();
