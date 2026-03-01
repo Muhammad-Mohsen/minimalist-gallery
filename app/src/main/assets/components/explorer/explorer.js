@@ -44,7 +44,7 @@ class ExplorerView extends HTMLElementBase {
 	}
 
 	onCrumbClick(event) {
-		const path = event.target.getAttribute('path');
+		const path = '/' + event.target.getAttribute('path');
 		EventBus.dispatch({ type: EventBus.Type.LIST_FILES, target: EventBus.Target.JS, data: { path } });
 	}
 
