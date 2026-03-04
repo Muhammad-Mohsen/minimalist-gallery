@@ -5,7 +5,7 @@ class MainView extends HTMLElementBase {
 		window.state = new URLSearchParams(location.search).toMap();
 		EventBus.subscribe(this.handler.bind(this));
 
-		window.BASE_IMG_PATH = state.debug ? '' : 'https://appassets.androidplatform.net/file/';
+		window.BASE_IMG_PATH = state.debug ? '' : 'https://appassets.androidplatform.net/image/';
 		window.BASE_THUMB_PATH = state.debug ? '' : 'https://appassets.androidplatform.net/thumbnail/';
 
 		window.SAFE_AREA_LEFT = 20;

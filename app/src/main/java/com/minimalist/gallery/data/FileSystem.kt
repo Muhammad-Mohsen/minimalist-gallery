@@ -70,6 +70,7 @@ object FileSystem {
 
 		// Only project what we actually use
 		val projection = arrayOf(
+			MediaStore.Images.Media._ID,
 			MediaStore.Images.Media.DATA,
 			MediaStore.Images.Media.SIZE,
 			MediaStore.Images.Media.DATE_MODIFIED,
@@ -102,6 +103,7 @@ object FileSystem {
 			selectionArgs,
 			sqlOrder
 		)?.use { cursor ->
+			val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
 			val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
 			val sizeCol  = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
 			val dateCol  = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
@@ -117,22 +119,23 @@ object FileSystem {
 				val relative = data.removePrefix(prefix)
 				val slashIdx = relative.indexOf('/')
 
+				// Direct image child of this directory
 				if (slashIdx == -1) {
-					// Direct image child of this directory
-					val name = relative
-					if (name.isNotEmpty() && IMAGE_EXTENSIONS.contains(name.substringAfterLast('.').lowercase())) {
+					if (relative.isNotEmpty() && IMAGE_EXTENSIONS.contains(relative.substringAfterLast('.').lowercase())) {
+						val id = cursor.getLong(idCol)
 						val size = cursor.getLong(sizeCol)
 						val date = cursor.getLong(dateCol)
 						val resolution = cursor.getString(resolutionCol)
 
 						try {
-							imageMap.putIfAbsent(name, FileItem(name, data, isDirectory = false, size = size, date = date, resolution = resolution))
+							imageMap.putIfAbsent(relative, FileItem(relative, id.toString(), false, size, resolution, date))
 						}
 						catch (e: Exception) {
 							e.printStackTrace()
 						}
 					}
-				} else {
+				}
+				else {
 					// First file seen inside a new subdirectory
 					val dirName = relative.take(slashIdx)
 					val dirPath = "$prefix$dirName"
@@ -193,7 +196,7 @@ data class FileItem(
 	val name: String,
 	val path: String,
 	val isDirectory: Boolean,
-	val size: Long = 0L,
+	val size: Long = 0,
 	val resolution: String = "",
-	val date: Long = 0L,
+	val date: Long = 0,
 )

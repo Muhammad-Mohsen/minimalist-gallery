@@ -154,22 +154,18 @@ class ImageView extends HTMLElementBase {
 			</toolbar>
 		`);
 
+		// this.imageCarousel.querySelector(`[src="${BASE_IMG_PATH}${state.image.path}"]`).scrollIntoView();
+
 		// Mark active thumbnail & scroll it into center
-		const thumbs = [...this.querySelectorAll('thumbnail-carousel img')];
-		thumbs.find(t => t.src.encodedName() == state.image.path.encodedName())
+		this.querySelector(`thumbnail-carousel img[src="${BASE_THUMB_PATH}${state.image.path}"]`)
 			.addClass('active')
-			.scrollIntoView({ inline: 'center', behavior: 'instant' });
+			.scrollIntoView({ inline: 'center' });
 	}
 	#renderImages() {
-		// return state.items
-		// 	.filter(i => !i.isDirectory)
-		// 	.map(i => `<img src="${basePath}${i.path}" loading="lazy" ondblclick="${this}.onImageDblClick(this)">`)
-		// 	.join('');
-
-		// const currentPath = this.src.split('/').pop();
-		// this.imageCarousel.querySelector(`[src="${basePath}${currentPath}"]`).scrollIntoView();
-
-		return `<img src="${BASE_IMG_PATH}${state.image.path}" style="transform-origin: 0 0" loading="lazy" onclick="${this}.onImageClick(this)" ondblclick="${this}.onImageDblClick(this)">`
+		return state.items
+			.filter(i => !i.isDirectory)
+			.map(i => `<img src="${BASE_IMG_PATH}${i.path}" style="transform-origin: 0 0" loading="lazy" ondblclick="${this}.onImageDblClick(this)">`)
+			.join('');
 	}
 
 	#renderInfo() {
@@ -180,7 +176,7 @@ class ImageView extends HTMLElementBase {
 	}
 
 	findImage(src, within = state.items) {
-		return within.find(i => i.path.encodedName() == src.encodedName());
+		return within.find(i => i.path == src.replace(BASE_THUMB_PATH, ''));
 	}
 
 	distance(p1, p2) {

@@ -71,6 +71,9 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 		super.onPause()
 
 		webView?.let { wv ->
+			// if launched while in background (during dev)
+			if (wv.width == 0 || wv.height == 0) return@let
+
 			val bitmap = createBitmap(wv.width, wv.height)
 
 			PixelCopy.request(
@@ -103,7 +106,6 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 
 	/* INIT */
 	@SuppressLint("SetJavaScriptEnabled")
-	@Suppress("DEPRECATION")
 	private fun initWebView() {
 		WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
@@ -119,8 +121,6 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 
 				WindowInsetsCompat.CONSUMED
 			}
-
-			setBackgroundColor(resources.getColor(R.color.background))
 
 			settings.apply {
 				javaScriptEnabled = true

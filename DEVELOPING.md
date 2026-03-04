@@ -1,8 +1,8 @@
 # Tasks
 ## Phase I
-- fetch failures
-- image carousel + left/right flicks
+- DONE - fetch failures
 - performance revisited
+- thumbnail resolution
 
 - explorer
 	- DONE - scroll handle
@@ -19,12 +19,17 @@
 	- DONE - MediaStore!!!
 		- DONE - navigation failures: virtual roots + clicking on the crumbs
 
-
 - image-view
 	- DONE - check slop code
 	- DONE - display image
 	- full-screen toggle?
 		- don't think so...just because of the camera hole
+	- image carousel + left/right flicks
+		- don't think so
+	- snap to 90deg within +-10deg
+		- don't think so
+	- thumbnail carousel scroll-select
+		- don't think so
 
 	- toolbars (center aligned)
 		- DONE - back
@@ -35,10 +40,8 @@
 			- DONE - date
 	- DONE - thumbnail carousel
 	- gestures
-		- left/right flicks
 		- DONE - zooming
 		- DONE - rotating
-			- snap to 90deg within +-10deg
 		- DONE - transform origin: gesture mid-point
 		- DONE - double-click to reset transforms
 		- DONE - click to toggle toolbars
