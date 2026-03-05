@@ -71,25 +71,27 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 		super.onPause()
 
 		webView?.let { wv ->
-			// if launched while in background (during dev)
-			if (wv.width == 0 || wv.height == 0) return@let
-
-			val bitmap = createBitmap(wv.width, wv.height)
-
-			PixelCopy.request(
-				window,
-				null,
-				bitmap,
-				{ copyResult ->
-					if (copyResult == PixelCopy.SUCCESS) {
-						mask.setImageBitmap(bitmap)
-						mask.visibility = View.VISIBLE
-					}
-				},
-				DispatchQueue.MAIN
-			)
+			try {
+				val bitmap = createBitmap(wv.width, wv.height)
+				PixelCopy.request(
+					window,
+					null,
+					bitmap,
+					{ copyResult ->
+						if (copyResult == PixelCopy.SUCCESS) {
+							mask.setImageBitmap(bitmap)
+							mask.visibility = View.VISIBLE
+						}
+					},
+					DispatchQueue.MAIN
+				)
+			}
+			catch (e: Exception) {
+				e.printStackTrace()
+			}
 		}
 	}
+
 	override fun onDestroy() {
 		super.onDestroy()
 
