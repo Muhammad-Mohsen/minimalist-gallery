@@ -5,8 +5,8 @@ class MainView extends HTMLElementBase {
 		window.state = new URLSearchParams(location.search).toMap();
 		EventBus.subscribe(this.handler.bind(this));
 
-		window.BASE_IMG_PATH = state.debug ? '' : 'https://appassets.androidplatform.net/image/';
-		window.BASE_THUMB_PATH = state.debug ? '' : 'https://appassets.androidplatform.net/thumbnail/';
+		window.BASE_IMG_PATH = state.debug ? 'http://localhost/minimalist-gallery/' : 'https://appassets.androidplatform.net/image/';
+		window.BASE_THUMB_PATH = state.debug ? 'http://localhost/minimalist-gallery/' : 'https://appassets.androidplatform.net/thumbnail/';
 
 		window.SAFE_AREA_LEFT = 20;
 		window.SAFE_AREA_RIGHT = window.innerWidth - 20;
@@ -24,7 +24,10 @@ class MainView extends HTMLElementBase {
 
 		when(event.type)
 			.is(EventBus.Type.LIST_FILES, () => {
-				const direction = event.data.path.length > (state.path?.length || 0) ? 'forward' : 'back';
+				let anim = event.data.path.length - (state.path?.length || 0);
+				anim = anim > 0 ? 'forward'
+					: anim < 0 ? 'back'
+					: 'cross-fade';
 
 				state.path = event.data.path;
 				state.items = event.data.items;
@@ -46,7 +49,7 @@ class MainView extends HTMLElementBase {
 						this.imageView = this.querySelector('image-view');
 						// this.imageView.render(state.items); // go ahead and set everything up!!
 					},
-					types: [direction],
+					types: [anim],
 				});
 			})
 			.is(EventBus.Type.BACK, () => {
