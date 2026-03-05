@@ -9,7 +9,7 @@ import androidx.annotation.RequiresApi
 import java.io.File
 
 val EXTERNAL_STORAGE_PATH: String = Environment.getExternalStorageDirectory().path
-private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "heic", "heif", "svg", "svgz", "ico")
+// private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "heic", "heif", "svg", "svgz", "ico")
 
 /**
  * The file explorer cache
@@ -57,108 +57,98 @@ object FileSystem {
 	 * Virtual roots ("/", "/storage", "/storage/emulated") are resolved via File fallbacks.
 	 */
 	fun listFiles2(context: Context, path: String, sortBy: String): ArrayList<FileItem> {
-		// --- Virtual roots (not indexed by MediaStore) ---
 		val virtualFiles = resolveVirtualRoot(context, path)
 		if (virtualFiles != null) {
 			return virtualFiles.mapTo(ArrayList()) { FileItem(it.name, it.absolutePath, it.isDirectory) }
 		}
 
-		// --- MediaStore query ---
-		// We query all images whose DATA path starts with "$path/", then derive
-		// immediate children (subdirectories and direct image files).
 		val prefix = if (path.endsWith("/")) path else "$path/"
+		val prefixLen = prefix.length
 
-		// Only project what we actually use
+		// files in the current folder have NO slashes after the prefix.
 		val projection = arrayOf(
 			MediaStore.Images.Media._ID,
 			MediaStore.Images.Media.DATA,
 			MediaStore.Images.Media.SIZE,
 			MediaStore.Images.Media.DATE_MODIFIED,
-			MediaStore.Images.Media.RESOLUTION
+			MediaStore.Images.Media.RESOLUTION,
+			MediaStore.Images.Media.DISPLAY_NAME
 		)
+
+		// We query everything in the folder AND subfolders in ONE go.
+		// Using DATA LIKE is necessary to capture the subtree efficiently.
 		val selection = "${MediaStore.Images.Media.DATA} LIKE ?"
 		val selectionArgs = arrayOf("$prefix%")
 
-		// Push sorting into SQLite so the cursor arrives pre-ordered.
-		// DATA ordering also groups all files inside the same subdirectory consecutively,
-		// which lets us skip entire subtrees once a directory is recorded (see below).
-		val sqlOrder = when (sortBy) {
-			SortBy.ZA      -> "${MediaStore.Images.Media.DATA} DESC"
-			SortBy.NEWEST  -> "${MediaStore.Images.Media.DATE_MODIFIED} DESC"
-			SortBy.OLDEST  -> "${MediaStore.Images.Media.DATE_MODIFIED} ASC"
-			else           -> "${MediaStore.Images.Media.DATA} ASC" // AZ default
-		}
-
-		val dirMap = LinkedHashMap<String, FileItem>()
-		val imageMap = LinkedHashMap<String, FileItem>()
-
-		// When sorted by DATA, every file in a subdirectory is adjacent.
-		// Once we've recorded a dir, store its path prefix so we can skip the rest.
-		var lastDirPrefix: String? = null
-
-		context.contentResolver.query(
+		// We MUST sort by DATA ASC in SQL to make the "Fast-skip" logic work.
+		// This allows us to jump over 1000 files in a subfolder as soon as we find the first one.
+		val cursor = context.contentResolver.query(
 			MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
 			projection,
 			selection,
 			selectionArgs,
-			sqlOrder
-		)?.use { cursor ->
-			val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-			val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-			val sizeCol  = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
-			val dateCol  = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
-			val resolutionCol  = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.RESOLUTION)
+			"${MediaStore.Images.Media.DATA} ASC"
+		)
 
-			while (cursor.moveToNext()) {
-				val data = cursor.getString(dataCol) ?: continue
+		val dirMap = LinkedHashMap<String, FileItem>()
+		val fileList = ArrayList<FileItem>()
+		var lastDirPrefix: String? = null
 
-				// Fast-skip: all files under a known subdirectory are grouped together
-				// when the cursor is sorted by DATA, so one prefix check eliminates them all.
+		cursor?.use { c ->
+			val dataCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+			val nameCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+			val idCol = c.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+			val sizeCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
+			val dateCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
+			val resCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.RESOLUTION)
+
+			while (c.moveToNext()) {
+				val data = c.getString(dataCol) ?: continue
+
+				// Fast-skip subdirectories we've already logged
 				if (lastDirPrefix != null && data.startsWith(lastDirPrefix)) continue
 
-				val relative = data.removePrefix(prefix)
-				val slashIdx = relative.indexOf('/')
+				val nextSlash = data.indexOf('/', prefixLen)
 
-				// Direct image child of this directory
-				if (slashIdx == -1) {
-					if (relative.isNotEmpty() && IMAGE_EXTENSIONS.contains(relative.substringAfterLast('.').lowercase())) {
-						val id = cursor.getLong(idCol)
-						val size = cursor.getLong(sizeCol)
-						val date = cursor.getLong(dateCol)
-						val resolution = cursor.getString(resolutionCol)
+				if (nextSlash == -1) {
+					// It's a DIRECT file in the current folder
+					fileList.add(FileItem(
+						name = c.getString(nameCol) ?: data.substring(prefixLen),
+						path = c.getLong(idCol).toString(),
+						isDirectory = false,
+						size = c.getLong(sizeCol),
+						resolution = c.getString(resCol) ?: "",
+						date = c.getLong(dateCol)
+					))
+				} else {
+					// It's a file inside a SUBDIRECTORY
+					val dirName = data.substring(prefixLen, nextSlash)
+					val dirPath = data.take(nextSlash)
 
-						try {
-							imageMap.putIfAbsent(relative, FileItem(relative, id.toString(), false, size, resolution, date))
-						}
-						catch (e: Exception) {
-							e.printStackTrace()
-						}
-					}
-				}
-				else {
-					// First file seen inside a new subdirectory
-					val dirName = relative.take(slashIdx)
-					val dirPath = "$prefix$dirName"
-					if (dirMap.putIfAbsent(dirName, FileItem(dirName, dirPath, isDirectory = true)) == null) {
-						lastDirPrefix = "$dirPath/"
-					}
+					// Since SQL is sorted by DATA, the first time we see this dirName,
+					// it is the entry point for that entire folder.
+					dirMap[dirName] = FileItem(dirName, dirPath, true)
+					lastDirPrefix = "$dirPath/" // Set the skip prefix
 				}
 			}
 		}
 
-		// Combine: directories first, then images
-		val result = ArrayList<FileItem>(dirMap.size + imageMap.size)
-		result.addAll(dirMap.values)
-		result.addAll(imageMap.values)
+		// FINAL SORTING (Much faster to do in memory on a filtered list than in SQL on the whole DB)
+		val result = ArrayList<FileItem>(dirMap.size + fileList.size)
 
-		// Name-based sorts (AZ / ZA) need no further work — insertion order already
-		// matches the SQL ORDER BY DATA. Date-based sorts only need a dirs-first pass
-		// since DATE_MODIFIED ordering doesn't separate dirs from images.
+		val sortedDirs = when (sortBy) {
+			SortBy.ZA -> dirMap.values.sortedByDescending { it.name }
+			else -> dirMap.values.sortedBy { it.name }
+		}
 		when (sortBy) {
-			SortBy.NEWEST -> result.sortWith(compareBy<FileItem> { !it.isDirectory }.thenByDescending { it.date })
-			SortBy.OLDEST -> result.sortWith(compareBy<FileItem> { !it.isDirectory }.thenBy { it.date })
+			SortBy.AZ -> fileList.sortBy { it.name }
+			SortBy.ZA -> fileList.sortByDescending { it.name }
+			SortBy.NEWEST -> fileList.sortByDescending { it.date }
+			SortBy.OLDEST -> fileList.sortBy { it.date }
 		}
 
+		result.addAll(sortedDirs)
+		result.addAll(fileList)
 		return result
 	}
 
