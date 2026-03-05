@@ -22,44 +22,47 @@
 }
 
 .ic-sun:before {
-	content: "\e000"
+	content: "\e000";
 }
 .ic-sort:before {
-	content: "\e001"
+	content: "\e001";
 }
 .ic-search:before {
-	content: "\e002"
+	content: "\e002";
 }
 .ic-more:before {
-	content: "\e003"
+	content: "\e003";
 }
 .ic-moon:before {
-	content: "\e004"
+	content: "\e004";
 }
 .ic-folder:before {
-	content: "\e005"
+	content: "\e005";
 }
 .ic-arrow-left:before {
-	content: "\e006"
+	content: "\e006";
 }
 .ic-trash-1:before {
-	content: "\e007"
+	content: "\e007";
 }
 .ic-share:before {
-	content: "\e008"
+	content: "\e008";
 }
 .ic-pencil:before {
-	content: "\e009"
+	content: "\e009";
 }
 .ic-heart:before {
-	content: "\e00a"
+	content: "\e00a";
 }
 .ic-unlock:before {
-	content: "\e00b"
-}
-.ic-play:before {
-  content: "\e00c";
+	content: "\e00b";
 }
 .ic-chevron-right:before {
-  content: "\e00d";
+	content: "\e00d";
+}
+.ic-scale:before {
+	content: "\e00c";
+}
+.ic-rotate:before {
+	content: "\e00e";
 }

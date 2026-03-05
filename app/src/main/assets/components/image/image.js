@@ -8,29 +8,38 @@ class ImageView extends HTMLElementBase {
 		if (!value) return;
 
 		state.image = this.findImage(value);
-		this.render();
-
 		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
 		this.gesture = {}
+
+		this.render();
 	}
 
 	// IMG
 	onImageClick() {
-		this.toolbar.classList.toggle('hidden');
+		this.header.classList.toggle('hidden');
+		this.footer.classList.toggle('hidden');
 		this.thumbnailCarousel.classList.toggle('hidden');
 	}
-	onImageDblClick(img) {
+	onImageDblClick(img, e) {
 		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
+		// img.style.transition = '.2s ease-in-out';
 		img.style.translate = img.style.rotate = img.style.scale = '';
+		this.#renderTransforms();
+	}
+	onImageTransitionEnd() {
+		setTimeout(() => {
+			this.mainImage.style.transition = '';
+			this.mainImage.style.transformOrigin = '0 0';
+		});
 	}
 	onThumbnailClick(img) {
 		// update state
 		state.image = this.findImage(img.src);
 
 		// update image
-		const mainImage = this.querySelector('image-carousel img');
-		mainImage.src = BASE_IMG_PATH + state.image.path;
-		this.onImageDblClick(mainImage);
+		this.mainImage.src = BASE_IMG_PATH + state.image.path;
+		this.mainImage.style.translate = this.mainImage.style.rotate = this.mainImage.style.scale = '';
+		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
 
 		// update thumbnail
 		this.querySelector('thumbnail-carousel img.active')?.removeClass('active');
@@ -38,6 +47,53 @@ class ImageView extends HTMLElementBase {
 
 		// update info
 		this.info.innerHTML = this.#renderInfo();
+
+		// update transforms
+		this.#renderTransforms();
+	}
+
+	onResetRotationClick() {
+		if (this.transform.rotate == 0) return;
+
+		const angleChange = -this.transform.rotate * Math.PI / 180;
+
+		const bounds = this.mainImage.getBoundingClientRect();
+		const currentCenter = this.center({ clientX: bounds.left, clientY: bounds.top }, { clientX: bounds.right, clientY: bounds.bottom });
+
+		const vector = { x: currentCenter.x - this.transform.x, y: currentCenter.y - this.transform.y }
+
+		const cos = Math.cos(angleChange);
+		const sin = Math.sin(angleChange);
+		const rotatedVector = { x: vector.x * cos - vector.y * sin, y: vector.x * sin + vector.y * cos }
+
+		this.transform.x = currentCenter.x - rotatedVector.x;
+		this.transform.y = currentCenter.y - rotatedVector.y;
+		this.transform.rotate = 0;
+
+		this.mainImage.style.transition = 'rotate .2s ease-in-out, translate .2s ease-in-out';
+		this.mainImage.style.translate = `${this.transform.x}px ${this.transform.y}px`;
+		this.mainImage.style.rotate = this.transform.rotate + 'deg';
+
+		this.#renderTransforms();
+	}
+	onActualSizeClick() {
+		const targetScale = this.mainImage.naturalWidth / document.body.clientWidth;
+		const scaleChange = targetScale / this.transform.scale;
+
+		if (scaleChange == 1) return;
+
+		const bounds = this.mainImage.getBoundingClientRect();
+		const currentCenter = this.center({ clientX: bounds.left, clientY: bounds.top }, { clientX: bounds.right, clientY: bounds.bottom });
+
+		this.transform.x = currentCenter.x - (currentCenter.x - this.transform.x) * scaleChange;
+		this.transform.y = currentCenter.y - (currentCenter.y - this.transform.y) * scaleChange;
+		this.transform.scale = targetScale;
+
+		this.mainImage.style.transition = 'scale .2s ease-in-out, translate .2s ease-in-out';
+		this.mainImage.style.scale = this.transform.scale;
+		this.mainImage.style.translate = `${this.transform.x}px ${this.transform.y}px`;
+
+		this.#renderTransforms();
 	}
 
 	onBackClick() {
@@ -116,6 +172,8 @@ class ImageView extends HTMLElementBase {
 			img.style.scale = this.transform.scale;
 			img.style.rotate = this.transform.rotate + 'deg';
 			img.style.translate = `${this.transform.x}px ${this.transform.y}px`;
+
+			this.#renderTransforms();
 		}
 		else if (e.touches.length == 1) {
 			this.transform.x = this.gesture.initialTransform.x + e.touches[0].clientX - this.gesture.x;
@@ -134,8 +192,13 @@ class ImageView extends HTMLElementBase {
 
 	render() {
 		super.render(`
-			<image-carousel id="imageCarousel" ontouchstart="${this}.onTouchStart(event);" ontouchmove="${this}.onTouchMove(event);" ontouchend="${this}.onTouchEnd(event);">
-				<img src="${BASE_IMG_PATH}${state.image.path}" style="transform-origin: 0 0" loading="lazy" ondblclick="${this}.onImageDblClick(this)">
+			<header id="header">
+				<button id="rotation-value" class="ic-rotate output" data-unit="°" onclick="${this}.onResetRotationClick()">0</button>
+				<button id="scale-value" class="ic-scale output" data-unit="%" onclick="${this}.onActualSizeClick()">100</button>
+			</header>
+			<image-carousel id="image-carousel" ontouchstart="${this}.onTouchStart(event);" ontouchmove="${this}.onTouchMove(event);" ontouchend="${this}.onTouchEnd(event);">
+				<img id="main-image" src="${BASE_IMG_PATH}${state.image.path}" loading="lazy" style="transform-origin: 0 0"
+					ontransitionend="${this}.onImageTransitionEnd()" ondblclick="${this}.onImageDblClick(this, event)">
 			</image-carousel>
 
 			<thumbnail-carousel id="thumbnail-carousel">
@@ -146,26 +209,20 @@ class ImageView extends HTMLElementBase {
 				}
 			</thumbnail-carousel>
 
-			<toolbar id="toolbar">
+			<footer id="footer">
 				<button id="back-button" icon class="ic-arrow-left" onclick="${this}.onBackClick()"></button>
 				<info id="info">
 					${this.#renderInfo()}
 				</info>
-			</toolbar>
+			</footer>
 		`);
 
-		// this.imageCarousel.querySelector(`[src="${BASE_IMG_PATH}${state.image.path}"]`).scrollIntoView();
+		this.#renderTransforms();
 
 		// Mark active thumbnail & scroll it into center
 		this.querySelector(`thumbnail-carousel img[src="${BASE_THUMB_PATH}${state.image.path}"]`)
 			.addClass('active')
 			.scrollIntoView({ inline: 'center' });
-	}
-	#renderImages() {
-		return state.items
-			.filter(i => !i.isDirectory)
-			.map(i => `<img src="${BASE_IMG_PATH}${i.path}" style="transform-origin: 0 0" loading="lazy" ondblclick="${this}.onImageDblClick(this)">`)
-			.join('');
 	}
 
 	#renderInfo() {
@@ -173,6 +230,12 @@ class ImageView extends HTMLElementBase {
 			<h1>${state.image.name}</h1>
 			<span>${state.image.resolution} <separator></separator> ${state.image.size.toSize()} <separator></separator> ${new Date(state.image.date * 1000).format('dd MMM yyyy HH:mm')}</span>
 		`;
+	}
+	#renderTransforms() {
+		const naturalWidth = Number(state.image.resolution.split(/\D+/)[0]);
+
+		this.scaleValue.textContent = Math.round(document.body.clientWidth * this.transform.scale / naturalWidth * 100);
+		this.rotationValue.textContent = Math.round(this.transform.rotate) || 0;
 	}
 
 	findImage(src, within = state.items) {
