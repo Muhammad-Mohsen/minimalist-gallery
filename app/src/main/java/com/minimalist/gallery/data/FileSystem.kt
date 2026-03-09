@@ -26,7 +26,8 @@ object FileSystem {
 		val latestModified = queryLatestModified(context, path)
 		val cached = cache[key]
 
-		if (cached == null || latestModified > (lastModifiedCache[key] ?: 0L)) {
+		// if (cached == null || latestModified > (lastModifiedCache[key] ?: 0L)) {
+		if (cached == null) {
 			val files = listFiles2(context, path, sortBy)
 			cache[key] = files
 			lastModifiedCache[key] = latestModified
@@ -65,7 +66,6 @@ object FileSystem {
 		val prefix = if (path.endsWith("/")) path else "$path/"
 		val prefixLen = prefix.length
 
-		// files in the current folder have NO slashes after the prefix.
 		val projection = arrayOf(
 			MediaStore.Images.Media._ID,
 			MediaStore.Images.Media.DATA,
@@ -87,10 +87,9 @@ object FileSystem {
 			projection,
 			selection,
 			selectionArgs,
-			"${MediaStore.Images.Media.DATA} ASC"
+			 "${MediaStore.Images.Media.DATA} ASC"
 		)
 
-		val dirMap = LinkedHashMap<String, FileItem>()
 		val fileList = ArrayList<FileItem>()
 		var lastDirPrefix: String? = null
 
@@ -110,8 +109,8 @@ object FileSystem {
 
 				val nextSlash = data.indexOf('/', prefixLen)
 
+				// It's a DIRECT file in the current folder
 				if (nextSlash == -1) {
-					// It's a DIRECT file in the current folder
 					fileList.add(FileItem(
 						name = c.getString(nameCol) ?: data.substring(prefixLen),
 						path = c.getLong(idCol).toString(),
@@ -124,32 +123,13 @@ object FileSystem {
 					// It's a file inside a SUBDIRECTORY
 					val dirName = data.substring(prefixLen, nextSlash)
 					val dirPath = data.take(nextSlash)
-
-					// Since SQL is sorted by DATA, the first time we see this dirName,
-					// it is the entry point for that entire folder.
-					dirMap[dirName] = FileItem(dirName, dirPath, true)
+					fileList.add(FileItem(dirName, dirPath, true))
 					lastDirPrefix = "$dirPath/" // Set the skip prefix
 				}
 			}
 		}
 
-		// FINAL SORTING (Much faster to do in memory on a filtered list than in SQL on the whole DB)
-		val result = ArrayList<FileItem>(dirMap.size + fileList.size)
-
-		val sortedDirs = when (sortBy) {
-			SortBy.ZA -> dirMap.values.sortedByDescending { it.name }
-			else -> dirMap.values.sortedBy { it.name }
-		}
-		when (sortBy) {
-			SortBy.AZ -> fileList.sortBy { it.name }
-			SortBy.ZA -> fileList.sortByDescending { it.name }
-			SortBy.NEWEST -> fileList.sortByDescending { it.date }
-			SortBy.OLDEST -> fileList.sortBy { it.date }
-		}
-
-		result.addAll(sortedDirs)
-		result.addAll(fileList)
-		return result
+		return finalizeSorting(fileList, sortBy)
 	}
 
 	/**
@@ -176,6 +156,18 @@ object FileSystem {
 			if (it.directory?.absolutePath == "/storage/emulated/0") File("/storage/emulated")
 			else it.directory
 		}).toTypedArray()
+	}
+
+	private fun finalizeSorting(list: ArrayList<FileItem>, sortBy: String): ArrayList<FileItem> {
+		val comparator = when (sortBy) {
+			SortBy.ZA -> compareBy<FileItem> { !it.isDirectory }.thenByDescending { it.name.lowercase() }
+			SortBy.NEWEST -> compareBy<FileItem> { !it.isDirectory }.thenByDescending { it.date }
+			SortBy.OLDEST -> compareBy<FileItem> { !it.isDirectory }.thenBy { it.date }
+			else -> compareBy<FileItem> { !it.isDirectory }.thenBy { it.name.lowercase() } // AZ
+		}
+
+		list.sortWith(comparator)
+		return list
 	}
 }
 
