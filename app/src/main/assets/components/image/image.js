@@ -21,16 +21,25 @@ class ImageView extends HTMLElementBase {
 		this.thumbnailCarousel.classList.toggle('hidden');
 	}
 	onImageDblClick(img, e) {
-		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
-		// img.style.transition = '.2s ease-in-out';
-		img.style.translate = img.style.rotate = img.style.scale = '';
+		this.transform = { x: 0, y: 0, rotate: 0 };
+		img.style.transition = '.2s ease-in-out';
+		img.style.translate = '0 0';
+		img.style.rotate = '0deg';
+
+		if (img.style.scale && img.style.scale != '1') {
+			this.transform.scale = 1;
+			img.style.scale = '1';
+		}
+		else {
+			const targetScale = this.mainImage.naturalWidth / document.body.clientWidth;
+			this.transform.scale = targetScale;
+			img.style.scale = targetScale;
+		}
+
 		this.#renderTransforms();
 	}
 	onImageTransitionEnd() {
-		setTimeout(() => {
-			this.mainImage.style.transition = '';
-			this.mainImage.style.transformOrigin = '0 0';
-		});
+		setTimeout(() => this.mainImage.style.transition = '');
 	}
 	onThumbnailClick(img) {
 		// update state
@@ -55,43 +64,21 @@ class ImageView extends HTMLElementBase {
 	onResetRotationClick() {
 		if (this.transform.rotate == 0) return;
 
-		const angleChange = -this.transform.rotate * Math.PI / 180;
-
-		const bounds = this.mainImage.getBoundingClientRect();
-		const currentCenter = this.center({ clientX: bounds.left, clientY: bounds.top }, { clientX: bounds.right, clientY: bounds.bottom });
-
-		const vector = { x: currentCenter.x - this.transform.x, y: currentCenter.y - this.transform.y }
-
-		const cos = Math.cos(angleChange);
-		const sin = Math.sin(angleChange);
-		const rotatedVector = { x: vector.x * cos - vector.y * sin, y: vector.x * sin + vector.y * cos }
-
-		this.transform.x = currentCenter.x - rotatedVector.x;
-		this.transform.y = currentCenter.y - rotatedVector.y;
 		this.transform.rotate = 0;
 
 		this.mainImage.style.transition = 'rotate .2s ease-in-out, translate .2s ease-in-out';
-		this.mainImage.style.translate = `${this.transform.x}px ${this.transform.y}px`;
-		this.mainImage.style.rotate = this.transform.rotate + 'deg';
+		this.mainImage.style.rotate = '0deg';
 
 		this.#renderTransforms();
 	}
 	onActualSizeClick() {
 		const targetScale = this.mainImage.naturalWidth / document.body.clientWidth;
-		const scaleChange = targetScale / this.transform.scale;
+		if (this.transform.scale == targetScale) return;
 
-		if (scaleChange == 1) return;
-
-		const bounds = this.mainImage.getBoundingClientRect();
-		const currentCenter = this.center({ clientX: bounds.left, clientY: bounds.top }, { clientX: bounds.right, clientY: bounds.bottom });
-
-		this.transform.x = currentCenter.x - (currentCenter.x - this.transform.x) * scaleChange;
-		this.transform.y = currentCenter.y - (currentCenter.y - this.transform.y) * scaleChange;
 		this.transform.scale = targetScale;
 
 		this.mainImage.style.transition = 'scale .2s ease-in-out, translate .2s ease-in-out';
 		this.mainImage.style.scale = this.transform.scale;
-		this.mainImage.style.translate = `${this.transform.x}px ${this.transform.y}px`;
 
 		this.#renderTransforms();
 	}
@@ -122,10 +109,10 @@ class ImageView extends HTMLElementBase {
 		}
 	}
 	onTouchMove(e) {
-		const img = this.imageCarousel.children[0];
+		const img = this.mainImage;
 
 		if (e.touches.length != this.gesture.touches) {
-			this.onTouchStart(e, this.gesture.timestamp); // maintain the original touchstart timestamp
+			this.onTouchStart(e, this.gesture.timestamp);
 			return;
 		}
 
@@ -138,37 +125,34 @@ class ImageView extends HTMLElementBase {
 			const currentAngle = this.angle(e.touches[0], e.touches[1]);
 			const currentCenter = this.center(e.touches[0], e.touches[1]);
 
-			// Calculate new scale and rotation
 			const scaleChange = currentDistance / this.gesture.distance;
 			const angleChange = currentAngle - this.gesture.angle;
+			const angleRad = angleChange * Math.PI / 180;
+			const cos = Math.cos(angleRad);
+			const sin = Math.sin(angleRad);
 
+			// 1. Update Scale and Rotation
 			this.transform.scale = this.gesture.initialTransform.scale * scaleChange;
 			this.transform.rotate = this.gesture.initialTransform.rotate + angleChange;
-			//
-			// yada, yada, yada...
-			//
-			// Calculate new translation to keep the "gesture center" fixed
-			// Vector from Initial Origin to Initial Center
-			const vX = this.gesture.center.x - this.gesture.initialTransform.x;
-			const vY = this.gesture.center.y - this.gesture.initialTransform.y;
 
-			// Rotate vector
-			const rad = angleChange * Math.PI / 180;
-			const cos = Math.cos(rad);
-			const sin = Math.sin(rad);
-			const rX = vX * cos - vY * sin;
-			const rY = vX * sin + vY * cos;
+			// 2. Update Translation so the gesture center stays pinned under the fingers.
+			// The image's visual center in screen space is (screenCx + tx, screenCy + ty).
+			// The vector from the visual center to the initial gesture center is:
+			//   dX = gesture.center.x - (screenCx + initialTx)
+			//   dY = gesture.center.y - (screenCy + initialTy)
+			// After rotate-by-angleChange and scale-by-scaleChange that vector becomes dX', dY'.
+			// We need (screenCx + newTx) + (dX', dY') == currentCenter, so:
+			//   newTx = currentCenter.x - screenCx - dX'
+			//   newTy = currentCenter.y - screenCy - dY'
+			const screenCx = document.body.clientWidth  / 2;
+			const screenCy = document.body.clientHeight / 2;
+			const dX = this.gesture.center.x - (screenCx + this.gesture.initialTransform.x);
+			const dY = this.gesture.center.y - (screenCy + this.gesture.initialTransform.y);
+			const dXr = (cos * dX - sin * dY) * scaleChange;
+			const dYr = (sin * dX + cos * dY) * scaleChange;
+			this.transform.x = currentCenter.x - screenCx - dXr;
+			this.transform.y = currentCenter.y - screenCy - dYr;
 
-			// Scale vector
-			const sX = rX * scaleChange;
-			const sY = rY * scaleChange;
-
-			// New Origin = CurrentCenter - NewVector
-			this.transform.x = currentCenter.x - sX;
-			this.transform.y = currentCenter.y - sY;
-			//
-			// ...we get something that works!
-			//
 			img.style.scale = this.transform.scale;
 			img.style.rotate = this.transform.rotate + 'deg';
 			img.style.translate = `${this.transform.x}px ${this.transform.y}px`;
@@ -197,7 +181,7 @@ class ImageView extends HTMLElementBase {
 				<button id="scale-value" class="ic-scale output" data-unit="%" onclick="${this}.onActualSizeClick()">100</button>
 			</header>
 			<image-carousel id="image-carousel" ontouchstart="${this}.onTouchStart(event);" ontouchmove="${this}.onTouchMove(event);" ontouchend="${this}.onTouchEnd(event);">
-				<img id="main-image" src="${BASE_IMG_PATH}${state.image.path}" loading="lazy" style="transform-origin: 0 0"
+				<img id="main-image" src="${BASE_IMG_PATH}${state.image.path}" loading="lazy" style="transform-origin: 50% 50%"
 					ontransitionend="${this}.onImageTransitionEnd()" ondblclick="${this}.onImageDblClick(this, event)">
 			</image-carousel>
 
