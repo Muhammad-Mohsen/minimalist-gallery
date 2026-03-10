@@ -1,8 +1,12 @@
 # Tasks
 ## Phase I
+- stream mediastore query to frontend
+- refresh button
+- DONE - starting animation
 - DONE - fetch failures
-- performance revisited
+- DONE - performance revisited
 - thumbnail resolution
+- https://developer.android.com/about/versions/14/changes/partial-photo-video-access
 
 - explorer
 	- DONE - scroll handle
@@ -62,10 +66,3 @@
 - grid view options
 	- masonry
 	- uniform
-
-
-GET https://appassets.androidplatform.net/thumbnail/storage/emulated/0/Pictures/Vehicles/Chevy/Chevrolet%20Corvette%20C8%20GT3R%20(1).jpg net::ERR_CACHE_MISS
-
-GET https://appassets.androidplatform.net/thumbnail/storage/emulated/0/Pictures/Vehicles/Chevy/Chevrolet%20Corvette%20C8%20GT3R%20(2).jpg net::ERR_CACHE_MISS
-
-GET https://appassets.androidplatform.net/thumbnail/storage/emulated/0/Pictures/Vehicles/Chevy/Chevrolet%20Corvette%20C8%20GT3R%20(3).jpg net::ERR_CACHE_MISS
