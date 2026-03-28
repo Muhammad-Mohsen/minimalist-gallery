@@ -15,6 +15,13 @@ class ImageView extends HTMLElementBase {
 	}
 
 	// IMG
+	onImageLoad() {
+		this.mainImage.style.translate = this.mainImage.style.rotate = this.mainImage.style.scale = '';
+		this.mainImage.style.transition = '.2s ease-in-out';
+
+		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
+		this.#renderTransforms();
+	}
 	onImageClick() {
 		this.header.classList.toggle('hidden');
 		this.footer.classList.toggle('hidden');
@@ -47,8 +54,6 @@ class ImageView extends HTMLElementBase {
 
 		// update image
 		this.mainImage.src = BASE_IMG_PATH + state.image.path;
-		this.mainImage.style.translate = this.mainImage.style.rotate = this.mainImage.style.scale = '';
-		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
 
 		// update thumbnail
 		this.querySelector('thumbnail-carousel img.active')?.removeClass('active');
@@ -56,9 +61,6 @@ class ImageView extends HTMLElementBase {
 
 		// update info
 		this.info.innerHTML = this.#renderInfo();
-
-		// update transforms
-		this.#renderTransforms();
 	}
 
 	onResetRotationClick() {
