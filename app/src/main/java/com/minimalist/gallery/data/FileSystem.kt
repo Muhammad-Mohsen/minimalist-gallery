@@ -16,41 +16,17 @@ val EXTERNAL_STORAGE_PATH: String = Environment.getExternalStorageDirectory().pa
  */
 object FileSystem {
 	private val cache = HashMap<String, ArrayList<FileItem>>()
-	private val lastModifiedCache = HashMap<String, Long>()
 
 	// API
 	fun listFiles(context: Context, path: String, sortBy: String = SortBy.AZ): ArrayList<FileItem> {
 		val key = "$sortBy/$path"
 
-		// Use MediaStore's max(DATE_MODIFIED) as the staleness signal
-		val latestModified = queryLatestModified(context, path)
 		val cached = cache[key]
+		if (cached != null) return cached
 
-		// if (cached == null || latestModified > (lastModifiedCache[key] ?: 0L)) {
-		if (cached == null) {
-			val files = listFiles2(context, path, sortBy)
-			cache[key] = files
-			lastModifiedCache[key] = latestModified
-			return files
-		}
-
-		return cached
-	}
-
-	private fun queryLatestModified(context: Context, path: String): Long {
-		val prefix = if (path.endsWith("/")) path else "$path/"
-		return try {
-			context.contentResolver.query(
-				MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-				arrayOf("MAX(${MediaStore.Images.Media.DATE_MODIFIED})"),
-				"${MediaStore.Images.Media.DATA} LIKE ?",
-				arrayOf("$prefix%"),
-				null
-			)?.use { cursor ->
-				if (cursor.moveToFirst()) cursor.getLong(0) else 0L
-			} ?: 0L
-		}
-		catch (_: Exception) { 0L }
+		val files = listFiles2(context, path, sortBy)
+		cache[key] = files
+		return files
 	}
 
 	/**
@@ -77,8 +53,8 @@ object FileSystem {
 
 		// We query everything in the folder AND subfolders in ONE go.
 		// Using DATA LIKE is necessary to capture the subtree efficiently.
-		val selection = "${MediaStore.Images.Media.DATA} LIKE ?"
-		val selectionArgs = arrayOf("$prefix%")
+		 val selection = "${MediaStore.Images.Media.DATA} LIKE ?"
+		 val selectionArgs = arrayOf("$prefix%")
 
 		// We MUST sort by DATA ASC in SQL to make the "Fast-skip" logic work.
 		// This allows us to jump over 1000 files in a subfolder as soon as we find the first one.
@@ -87,7 +63,7 @@ object FileSystem {
 			projection,
 			selection,
 			selectionArgs,
-			 "${MediaStore.Images.Media.DATA} ASC"
+			"${MediaStore.Images.Media.DATA} ASC"
 		)
 
 		val fileList = ArrayList<FileItem>()
