@@ -43,17 +43,34 @@
 			- DONE - size / resolution
 			- DONE - date
 	- DONE - thumbnail carousel
-	- gestures
+	- DONE - gestures
 		- DONE - zooming
 		- DONE - rotating
 		- DONE - transform origin: gesture mid-point
 		- DONE - double-click to reset transforms
 		- DONE - click to toggle toolbars
 
-- view transitions
+- DONE - view transitions
 	- navigation
 	- image view
 	- image close
+
+- masonry
+https://bfgeek.com/flexbox-image-gallery/
+```css
+.gallery {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px;
+}
+
+img {
+	--ar: attr(width type(<number>)) / attr(height type(<number>));
+	width: calc(20% * var(--ar));
+	height: auto;
+	flex-grow: calc(var(--ar));
+}
+```
 
 ## Phase II
 - edit images (prompt user to save copy, no write permission needed)

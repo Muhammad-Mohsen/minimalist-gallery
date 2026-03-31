@@ -46,12 +46,12 @@ button {
 	border: none;
 	color: var(--text);
 	background: transparent;
-	transition: .3s, color .5s, background .6s ease-in, border-color .3s, opacity .2s, translate .2s;
+	transition: .3s, color .5s, background .6s ease-in, border-color .3s, opacity .2s;
 
 	&:active {
 		background: var(--accent);
 		scale: .9;
-		transition: .3s, color .5s, background .3s, border-color .3s, opacity .2s, translate .2s;
+		transition: .3s, color .5s, background .3s, border-color .3s, opacity .2s;
 	}
 }
 

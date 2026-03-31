@@ -266,21 +266,22 @@ html:active-view-transition-type(back) {
 }
 
 @keyframes forward-in {
-	from {
+	0% {
 		translate: 100vw 0;
 		opacity: 0;
 	}
-	to {
+	50% { opacity: 0; }
+	100% {
 		translate: 0;
 		opacity: 1;
 	}
 }
 @keyframes forward-out {
-	from {
+	0% {
 		translate: 0;
 		opacity: 1;
 	}
-	to {
+	100% {
 		translate: -30vw;
 		opacity: 0;
 	}

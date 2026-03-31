@@ -5,7 +5,6 @@ class EventBus {
 		BACK: 'back',
 		REQUEST_PERMISSION: 'requestPermission',
 		LIST_FILES: 'listFiles',
-		VIEW_IMG: 'image',
 		SORT_BY: 'sortBy',
 	};
 

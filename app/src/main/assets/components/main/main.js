@@ -3,6 +3,8 @@ class MainView extends HTMLElementBase {
 		super();
 
 		window.state = new URLSearchParams(location.search).toMap();
+		state.explorers = {};
+
 		EventBus.subscribe(this.handler.bind(this));
 
 		window.BASE_IMG_PATH = state.debug ? 'http://localhost/minimalist-gallery/' : 'https://appassets.androidplatform.net/image/';
@@ -38,16 +40,24 @@ class MainView extends HTMLElementBase {
 
 				document.startViewTransition({
 					update: () => {
-						this.innerHTML = `
-							<explorer-view></explorer-view>
-							<image-view src=""></image-view>
-						`.minify();
+						if (this.explorerView) this.explorerView.style.display = 'none';
 
-						this.explorerView = this.querySelector('explorer-view');
-						this.explorerView.render(state.path, state.items);
+						if (!state.explorers[state.path]) {
+							this.explorerView = document.createElement('explorer-view');
+							state.explorers[state.path] = this.explorerView;
+							this.insertAdjacentElement('afterbegin', this.explorerView);
+							this.explorerView.render(state.path, state.items);
+						}
+						else {
+							this.explorerView = state.explorers[state.path];
+							this.explorerView.style.display = '';
+							if (anim == 'forward') this.explorerView.render(state.path, state.items); // force re-render when going forward
+						}
 
-						this.imageView = this.querySelector('image-view');
-						// this.imageView.render(state.items); // go ahead and set everything up!!
+						if (!this.imageView) {
+							this.imageView = '<image-view src=""></image-view'.toElement();
+							this.insertAdjacentElement('beforeend', this.imageView);
+						}
 					},
 					types: [anim],
 				});
