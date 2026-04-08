@@ -66,3 +66,9 @@
 .ic-rotate:before {
 	content: "\e00e";
 }
+.ic-refresh-2:before {
+	content: "\e00f";
+}
+.ic-refresh:before {
+	content: "\e010";
+}

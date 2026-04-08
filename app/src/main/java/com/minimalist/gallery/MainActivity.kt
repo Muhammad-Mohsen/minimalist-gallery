@@ -158,6 +158,7 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 				State.path = event.data["path"] as? String ?: EXTERNAL_STORAGE_PATH
 				dispatchListFiles()
 			}
+			Type.LIST_FILES_REFRESH -> dispatchListFiles(true)
 			Type.SORT_BY -> {
 				State.sort = event.data["sort"] as? String ?: SortBy.AZ
 				dispatchListFiles()
@@ -191,23 +192,16 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 	}
 
 	/* UTILS */
-	private fun dispatchListFiles() {
-		val items = FileSystem.listFiles(applicationContext, State.path, State.sort)
-		val data = mapOf(
-			"path" to State.path,
-			"items" to items.map {
-				mapOf(
-					"name" to it.name,
-					"path" to it.path,
-					"isDirectory" to it.isDirectory,
-					"size" to it.size / 1024.0,
-					"resolution" to it.resolution,
-					"date" to it.date,
-				)
-			}
-		)
+	private fun dispatchListFiles(forceRefresh: Boolean = false) {
+		DispatchQueue.BG.post {
+			val items = FileSystem.listFiles(applicationContext, State.path, State.sort, forceRefresh)
+			val data = mapOf(
+				"path" to State.path,
+				"items" to items.map { it.toMap() }
+			)
 
-		EventBus.dispatch(Event(Type.LIST_FILES, Target.NATIVE, data))
+			EventBus.dispatch(Event(Type.LIST_FILES, Target.NATIVE, data))
+		}
 	}
 	private fun dispatchBack() {
 		val parent = State.path.substringBeforeLast('/', "")

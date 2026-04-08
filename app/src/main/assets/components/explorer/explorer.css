@@ -64,6 +64,33 @@ explorer-view {
 		}
 
 		button[icon] { font-size: 22px; }
+
+		.more-button { anchor-name: --more-button; }
+		.more-popover {
+			position-anchor: --more-button;
+			position: absolute;
+			position-area: center;
+			margin-left: -56px;
+			margin-top: -4px;
+			padding: 4px;
+			border-radius: 28px;
+			border: none;
+			background: var(--background-light);
+			opacity: 0;
+			translate: 20px 0;
+			transition: .3s allow-discrete;
+
+			&:popover-open {
+				display: flex;
+				opacity: 1;
+				translate: 0;
+
+				@starting-style {
+					opacity: 0;
+					translate: 20px 0;
+				}
+			}
+		}
 	}
 
 	grid {
@@ -270,7 +297,6 @@ html:active-view-transition-type(back) {
 		translate: 100vw 0;
 		opacity: 0;
 	}
-	50% { opacity: 0; }
 	100% {
 		translate: 0;
 		opacity: 1;

@@ -5,6 +5,7 @@ class EventBus {
 		BACK: 'back',
 		REQUEST_PERMISSION: 'requestPermission',
 		LIST_FILES: 'listFiles',
+		LIST_FILES_REFRESH: 'listFilesRefresh',
 		SORT_BY: 'sortBy',
 	};
 

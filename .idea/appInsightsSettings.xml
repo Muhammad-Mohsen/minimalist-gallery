@@ -3,12 +3,12 @@
   <component name="AppInsightsSettings">
     <option name="tabSettings">
       <map>
-        <entry key="Android Vitals">
+        <entry key="Android vitals">
           <value>
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.minimalist.todo2" />
+                  <option name="appId" value="com.minimalist.gallery" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

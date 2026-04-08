@@ -12,19 +12,20 @@ val EXTERNAL_STORAGE_PATH: String = Environment.getExternalStorageDirectory().pa
 // private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "heic", "heif", "svg", "svgz", "ico")
 
 /**
- * The file explorer cache
+ * The file explorer
+ * The contentResolver.query API is one of the worst-designed APIs I've ever come across!!
  */
 object FileSystem {
 	private val cache = HashMap<String, ArrayList<FileItem>>()
 
 	// API
-	fun listFiles(context: Context, path: String, sortBy: String = SortBy.AZ): ArrayList<FileItem> {
+	fun listFiles(context: Context, path: String, sortBy: String = SortBy.AZ, forceRefresh: Boolean = false): ArrayList<FileItem> {
 		val key = "$sortBy/$path"
 
 		val cached = cache[key]
-		if (cached != null) return cached
+		if (cached != null && !forceRefresh) return cached
 
-		val files = listFiles2(context, path, sortBy)
+		val files = listFilesInternal(context, path, sortBy)
 		cache[key] = files
 		return files
 	}
@@ -33,7 +34,7 @@ object FileSystem {
 	 * Lists directories and image files under [path] using MediaStore for real storage paths.
 	 * Virtual roots ("/", "/storage", "/storage/emulated") are resolved via File fallbacks.
 	 */
-	fun listFiles2(context: Context, path: String, sortBy: String): ArrayList<FileItem> {
+	private fun listFilesInternal(context: Context, path: String, sortBy: String): ArrayList<FileItem> {
 		val virtualFiles = resolveVirtualRoot(context, path)
 		if (virtualFiles != null) {
 			return virtualFiles.mapTo(ArrayList()) { FileItem(it.name, it.absolutePath, it.isDirectory) }
@@ -48,7 +49,6 @@ object FileSystem {
 			MediaStore.Images.Media.SIZE,
 			MediaStore.Images.Media.DATE_MODIFIED,
 			MediaStore.Images.Media.RESOLUTION,
-			MediaStore.Images.Media.DISPLAY_NAME
 		)
 
 		// We query everything in the folder AND subfolders in ONE go.
@@ -71,7 +71,6 @@ object FileSystem {
 
 		cursor?.use { c ->
 			val dataCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-			val nameCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
 			val idCol = c.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
 			val sizeCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
 			val dateCol = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
@@ -87,15 +86,21 @@ object FileSystem {
 
 				// It's a DIRECT file in the current folder
 				if (nextSlash == -1) {
+
+					// discard tiffs as they aren't supported by <img>
+					val extension = data.substringAfterLast(".").lowercase()
+					if (extension.startsWith("tif")) continue
+
 					fileList.add(FileItem(
-						name = c.getString(nameCol) ?: data.substring(prefixLen),
+						name = data.substring(prefixLen),
 						path = c.getLong(idCol).toString(),
 						isDirectory = false,
 						size = c.getLong(sizeCol),
 						resolution = c.getString(resCol) ?: "",
 						date = c.getLong(dateCol)
 					))
-				} else {
+				}
+				else {
 					// It's a file inside a SUBDIRECTORY
 					val dirName = data.substring(prefixLen, nextSlash)
 					val dirPath = data.take(nextSlash)
@@ -105,7 +110,7 @@ object FileSystem {
 			}
 		}
 
-		return finalizeSorting(fileList, sortBy)
+		return sortFiles(fileList, sortBy)
 	}
 
 	/**
@@ -134,7 +139,7 @@ object FileSystem {
 		}).toTypedArray()
 	}
 
-	private fun finalizeSorting(list: ArrayList<FileItem>, sortBy: String): ArrayList<FileItem> {
+	private fun sortFiles(list: ArrayList<FileItem>, sortBy: String): ArrayList<FileItem> {
 		val comparator = when (sortBy) {
 			SortBy.ZA -> compareBy<FileItem> { !it.isDirectory }.thenByDescending { it.name.lowercase() }
 			SortBy.NEWEST -> compareBy<FileItem> { !it.isDirectory }.thenByDescending { it.date }
@@ -157,4 +162,15 @@ data class FileItem(
 	val size: Long = 0,
 	val resolution: String = "",
 	val date: Long = 0,
-)
+) {
+	fun toMap(): Map<String, Any> {
+		return mapOf(
+			"name" to name,
+			"path" to path,
+			"isDirectory" to isDirectory,
+			"size" to size / 1024.0,
+			"resolution" to resolution,
+			"date" to date,
+		)
+	}
+}

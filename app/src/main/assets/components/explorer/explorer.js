@@ -26,10 +26,27 @@ class ExplorerView extends HTMLElementBase {
 		}
 	}
 
+	onMoreClick() {
+		this.moreDialog.show();
+	}
+
 	onSearchClick() {
 		this.searchField.classList.toggle('show');
 		this.searchField.focus();
 	}
+	onSearchInput(value) {
+		value = value.trim().toLowerCase();
+		this.grid.children.toArray().forEach(item => {
+			const name = item.getAttribute('name').toLowerCase();
+			item.style.display = name.includes(value) ? '' : 'none';
+		});
+	}
+
+	onRefreshClick() {
+		EventBus.dispatch({ type: EventBus.Type.LIST_FILES_REFRESH, target: EventBus.Target.JS, data: { path: state.path } });
+		this.morePopover.hidePopover();
+	}
+
 	onSortClick() {
 		const radio = this.sortDialog.querySelector(`input[name="sort"][value="${state.sort}"]`);
 		if (radio) radio.checked = true;
@@ -62,14 +79,6 @@ class ExplorerView extends HTMLElementBase {
 		img.src = 'assets/error-fallback.png';
 	}
 
-	onSearchInput(value) {
-		value = value.trim().toLowerCase();
-		this.grid.children.toArray().forEach(item => {
-			const name = item.getAttribute('name').toLowerCase();
-			item.style.display = name.includes(value) ? '' : 'none';
-		});
-	}
-
 	render(path, items) {
 		const parts = path.split('/').filter(p => p);
 
@@ -82,9 +91,14 @@ class ExplorerView extends HTMLElementBase {
 
 				<actions>
 					<h2 id="selection-count"></h2>
-					<button icon class="ic-search" id="search-button" onclick="${this}.onSearchClick()"></button>
-					<button icon class="ic-sort" id="sort-button" onclick="${this}.onSortClick()"></button>
+					<button icon class="ic-search" onclick="${this}.onSearchClick()"></button>
+					<button icon class="ic-more more-button" popovertarget="more-popover-${this}"></button>
 				</actions>
+
+				<popover id="more-popover-${this}" class="more-popover" popover>
+					<button icon class="ic-sort" id="sort-button" onclick="${this}.onSortClick()"></button>
+					<button icon class="ic-refresh" id="refresh-button" onclick="${this}.onRefreshClick()"></button>
+				</popover>
 			</header>
 
 			<grid id="items">
