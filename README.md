@@ -1,7 +1,7 @@
 # Minimalist Gallery
-[![License](support-files/badges/license.svg)](LICENSE)
-![Min SDK](support-files/badges/min-sdk.svg)
-[![Download](support-files/badges/download.svg)](https://play.google.com/store/apps/details?id=com.minimalist.gallery)
+[![License](docs/badges/license.svg)](LICENSE)
+![Min SDK](docs/badges/min-sdk.svg)
+[![Download](docs/badges/download.svg)](https://play.google.com/store/apps/details?id=com.minimalist.gallery)
 
 A light weight, folder-based clean image gallery built with a combination of Kotlin for the Android native backend and Vanilla JavaScript/HTML/CSS for the frontend.
 
@@ -9,7 +9,7 @@ A light weight, folder-based clean image gallery built with a combination of Kot
 - Supports `jpg`, `jpeg`, `png`, `gif`, `bmp`, `webp`, `heic`, `heif`, `svg`, `svgz`, `ico` files
 - Built-in folder explorer
 - Canvas-like image viewer
-- Search
+- Search, sort
 
 ## Thanks
 - [Angular Icons](https://angularicons.com/) for the awesome icons.
@@ -17,11 +17,11 @@ A light weight, folder-based clean image gallery built with a combination of Kot
 ## Screenshots
 |Explorer|Explorer|Light Theme|
 |:-:|:-:|:-:|
-|![Explorer 1](support-files/screenshots/explorer-1.jpg)|![Explorer 2](support-files/screenshots/explorer-2.jpg)|![Light Theme](support-files/screenshots/explorer-light.jpg)|
+|![Explorer 1](docs/screenshots/explorer-1.jpg)|![Explorer 2](docs/screenshots/explorer-2.jpg)|![Light Theme](docs/screenshots/explorer-light.jpg)|
 
 |Sort By|Viewer|Viewer|
 |:-:|:-:|:-:|
-|![Sort By](support-files/screenshots/explorer-sort-by.jpg)|![Viewer 1](support-files/screenshots/viewer-1.jpg)|![Viewer 2](support-files/screenshots/viewer-2.jpg)|
+|![Sort By](docs/screenshots/explorer-sort-by.jpg)|![Viewer 1](docs/screenshots/viewer-1.jpg)|![Viewer 2](docs/screenshots/viewer-2.jpg)|
 
 
 ## Architecture Overview
