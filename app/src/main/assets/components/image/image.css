@@ -8,7 +8,7 @@ image-view {
 
 	header {
 		position: fixed;
-		inset: 12px 12px auto auto;
+		inset: 20px 20px auto auto;
 		display: flex;
 		gap: 12px;
 		z-index: 1;
@@ -31,6 +31,7 @@ image-view {
 
 	image-carousel {
 		display: flex;
+		border-radius: 8px;
 		overflow: hidden;
 
 		img {

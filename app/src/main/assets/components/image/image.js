@@ -17,7 +17,6 @@ class ImageView extends HTMLElementBase {
 	// IMG
 	onImageLoad() {
 		this.mainImage.style.translate = this.mainImage.style.rotate = this.mainImage.style.scale = '';
-		this.mainImage.style.transition = '.2s ease-in-out';
 
 		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
 		this.#renderTransforms();
@@ -41,6 +40,12 @@ class ImageView extends HTMLElementBase {
 			const targetScale = this.mainImage.naturalWidth / document.body.clientWidth;
 			this.transform.scale = targetScale;
 			img.style.scale = targetScale;
+
+			const cx = document.body.clientWidth / 2;
+			const cy = document.body.clientHeight / 2;
+			this.transform.x = (e.clientX - cx) * (1 - targetScale);
+			this.transform.y = (e.clientY - cy) * (1 - targetScale);
+			img.style.translate = `${this.transform.x}px ${this.transform.y}px`;
 		}
 
 		this.#renderTransforms();
@@ -111,6 +116,8 @@ class ImageView extends HTMLElementBase {
 		}
 	}
 	onTouchMove(e) {
+		e.stopPropagation();
+
 		const img = this.mainImage;
 
 		if (e.touches.length != this.gesture.touches) {
@@ -121,8 +128,6 @@ class ImageView extends HTMLElementBase {
 		if (this.gesture.ignore) return;
 
 		if (e.touches.length == 2) {
-			e.preventDefault();
-
 			const currentDistance = this.distance(e.touches[0], e.touches[1]);
 			const currentAngle = this.angle(e.touches[0], e.touches[1]);
 			const currentCenter = this.center(e.touches[0], e.touches[1]);
@@ -184,7 +189,7 @@ class ImageView extends HTMLElementBase {
 			</header>
 			<image-carousel id="image-carousel" ontouchstart="${this}.onTouchStart(event);" ontouchmove="${this}.onTouchMove(event);" ontouchend="${this}.onTouchEnd(event);">
 				<img id="main-image" src="${BASE_IMG_PATH}${state.image.path}" loading="lazy" style="transform-origin: 50% 50%"
-					ontransitionend="${this}.onImageTransitionEnd()" ondblclick="${this}.onImageDblClick(this, event)">
+					onload="${this}.onImageLoad()" ontransitionend="${this}.onImageTransitionEnd()" ondblclick="${this}.onImageDblClick(this, event)">
 			</image-carousel>
 
 			<thumbnail-carousel id="thumbnail-carousel">
