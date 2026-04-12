@@ -37,7 +37,10 @@ class ImageView extends HTMLElementBase {
 			img.style.scale = '1';
 		}
 		else {
-			const targetScale = this.mainImage.naturalWidth / document.body.clientWidth;
+			const targetScale = Math.max(
+				this.mainImage.naturalWidth / document.body.clientWidth,
+				this.mainImage.naturalHeight / document.body.clientHeight
+			);
 			this.transform.scale = targetScale;
 			img.style.scale = targetScale;
 
@@ -79,7 +82,10 @@ class ImageView extends HTMLElementBase {
 		this.#renderTransforms();
 	}
 	onActualSizeClick() {
-		const targetScale = this.mainImage.naturalWidth / document.body.clientWidth;
+		const targetScale = Math.max(
+			this.mainImage.naturalWidth / document.body.clientWidth,
+			this.mainImage.naturalHeight / document.body.clientHeight
+		);
 		if (this.transform.scale == targetScale) return;
 
 		this.transform.scale = targetScale;
@@ -151,7 +157,7 @@ class ImageView extends HTMLElementBase {
 			// We need (screenCx + newTx) + (dX', dY') == currentCenter, so:
 			//   newTx = currentCenter.x - screenCx - dX'
 			//   newTy = currentCenter.y - screenCy - dY'
-			const screenCx = document.body.clientWidth  / 2;
+			const screenCx = document.body.clientWidth / 2;
 			const screenCy = document.body.clientHeight / 2;
 			const dX = this.gesture.center.x - (screenCx + this.gesture.initialTransform.x);
 			const dY = this.gesture.center.y - (screenCy + this.gesture.initialTransform.y);
@@ -208,8 +214,6 @@ class ImageView extends HTMLElementBase {
 			</footer>
 		`);
 
-		this.#renderTransforms();
-
 		// Mark active thumbnail & scroll it into center
 		this.querySelector(`thumbnail-carousel img[src="${BASE_THUMB_PATH}${state.image.path}"]`)
 			.addClass('active')
@@ -223,9 +227,12 @@ class ImageView extends HTMLElementBase {
 		`;
 	}
 	#renderTransforms() {
-		const naturalWidth = Number(state.image.resolution.split(/\D+/)[0]);
+		const baseScale = Math.min(
+			document.body.clientWidth / this.mainImage.naturalWidth,
+			document.body.clientHeight / this.mainImage.naturalHeight
+		);
 
-		this.scaleValue.textContent = Math.round(document.body.clientWidth * this.transform.scale / naturalWidth * 100);
+		this.scaleValue.textContent = Math.round(baseScale * this.transform.scale * 100);
 		this.rotationValue.textContent = Math.round(this.transform.rotate) || 0;
 	}
 
