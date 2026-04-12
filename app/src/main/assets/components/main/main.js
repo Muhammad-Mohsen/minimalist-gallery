@@ -40,6 +40,9 @@ class MainView extends HTMLElementBase {
 
 				document.startViewTransition({
 					update: () => {
+						const permissionView = this.querySelector('permission-view');
+						if (permissionView) permissionView.style.display = 'none';
+
 						if (this.explorerView) this.explorerView.style.display = 'none';
 
 						if (!state.explorers[state.path]) {
