@@ -1,6 +1,6 @@
 explorer-view {
 	--header-height: 40vh;
-	--actions-height: 64px;
+	--actions-height: 80px;
 	--animation-range: 40vh;
 
 	display: flex;
@@ -57,7 +57,7 @@ explorer-view {
 
 		actions {
 			position: absolute;
-			inset: auto var(--safe-area) 12px auto;
+			inset: auto var(--safe-area) var(--safe-area) auto;
 			display: flex;
 			align-items: center;
 			gap: 8px;
@@ -166,7 +166,7 @@ explorer-view {
 
 	scrollbar-track {
 		position: fixed;
-		inset: var(--header-height) 0 80px auto;
+		inset: var(--header-height) 0 calc(2 * var(--safe-area) + 56px) auto;
 		width: 24px;
 
 		scale: 0 1;
@@ -200,7 +200,7 @@ explorer-view {
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
-		margin: 12px var(--safe-area);
+		margin: var(--safe-area);
 		padding: 4px;
 		border-radius: 28px;
 		overflow: hidden;
