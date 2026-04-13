@@ -284,8 +284,8 @@ html:active-view-transition-type(cross-fade) {
 	&::view-transition-new(root) { animation: .7s fade-in; }
 }
 html:active-view-transition-type(forward) {
-	&::view-transition-old(root) { animation: .2s forward-out; }
-	&::view-transition-new(root) { animation: .3s forward-in; }
+	&::view-transition-old(root) { animation: .2s forward-out both; }
+	&::view-transition-new(root) { animation: .3s forward-in both; }
 }
 html:active-view-transition-type(back) {
 	&::view-transition-old(root) { animation: .2s forward-in reverse both; }
