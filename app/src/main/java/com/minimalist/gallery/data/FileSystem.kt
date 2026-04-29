@@ -9,7 +9,7 @@ import androidx.annotation.RequiresApi
 import java.io.File
 
 val EXTERNAL_STORAGE_PATH: String = Environment.getExternalStorageDirectory().path
-// private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "heic", "heif", "svg", "svgz", "ico")
+private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "jpe", "jfif", "png", "gif", "bmp", "webp", "avif", "svg", "svgz", "ico")
 
 /**
  * The file explorer
@@ -89,7 +89,7 @@ object FileSystem {
 
 					// discard tiffs as they aren't supported by <img>
 					val extension = data.substringAfterLast(".").lowercase()
-					if (extension.startsWith("tif")) continue
+					if (!IMAGE_EXTENSIONS.contains(extension)) continue
 
 					fileList.add(FileItem(
 						name = data.substring(prefixLen),
