@@ -69,7 +69,6 @@ object EventBus {
 		const val REQUEST_PERMISSION = "requestPermission"
 		const val PERMISSION_VIEW = "permissionView"
 		const val LIST_FILES = "listFiles"
-		const val LIST_FILES_REFRESH = "listFilesRefresh"
 		const val SORT_BY = "sortBy"
 	}
 

@@ -156,12 +156,11 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 			Type.BACK -> dispatchBack()
 			Type.LIST_FILES -> {
 				State.path = event.data["path"] as? String ?: EXTERNAL_STORAGE_PATH
-				dispatchListFiles()
+				dispatchListFiles(event.data["force"] as? Boolean ?: false)
 			}
-			Type.LIST_FILES_REFRESH -> dispatchListFiles(true)
 			Type.SORT_BY -> {
 				State.sort = event.data["sort"] as? String ?: SortBy.AZ
-				dispatchListFiles()
+				dispatchListFiles(true)
 			}
 		}
 	}
@@ -197,7 +196,8 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 			val items = FileSystem.listFiles(applicationContext, State.path, State.sort, forceRefresh)
 			val data = mapOf(
 				"path" to State.path,
-				"items" to items.map { it.toMap() }
+				"items" to items.map { it.toMap() },
+				"force" to forceRefresh
 			)
 
 			EventBus.dispatch(Event(Type.LIST_FILES, Target.NATIVE, data))

@@ -54,11 +54,11 @@ class MainView extends HTMLElementBase {
 						else {
 							this.explorerView = state.explorers[state.path];
 							this.explorerView.style.display = '';
-							if (anim == 'forward') this.explorerView.render(state.path, state.items); // force re-render when going forward
+							if (anim == 'forward' || event.data.force) this.explorerView.render(state.path, state.items); // force re-render when going forward
 						}
 
 						if (!this.imageView) {
-							this.imageView = '<image-view src=""></image-view'.toElement();
+							this.imageView = '<image-view src=""></image-view>'.toElement();
 							this.insertAdjacentElement('beforeend', this.imageView);
 						}
 					},

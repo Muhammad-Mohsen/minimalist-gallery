@@ -43,7 +43,7 @@ class ExplorerView extends HTMLElementBase {
 	}
 
 	onRefreshClick() {
-		EventBus.dispatch({ type: EventBus.Type.LIST_FILES_REFRESH, target: EventBus.Target.JS, data: { path: state.path } });
+		EventBus.dispatch({ type: EventBus.Type.LIST_FILES, target: EventBus.Target.JS, data: { path: state.path, force: true } });
 		this.morePopover.hidePopover();
 	}
 
