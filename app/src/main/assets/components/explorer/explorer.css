@@ -280,8 +280,8 @@ explorer-view {
 
 /* VIEW TRANSITIONS */
 html:active-view-transition-type(cross-fade) {
-	&::view-transition-old(root) { animation: .2s fade-out; }
-	&::view-transition-new(root) { animation: .7s fade-in; }
+	&::view-transition-old(root) { animation: .2s fade-out both; }
+	&::view-transition-new(root) { animation: .5s fade-in .2s both; }
 }
 html:active-view-transition-type(forward) {
 	&::view-transition-old(root) { animation: .2s forward-out both; }
