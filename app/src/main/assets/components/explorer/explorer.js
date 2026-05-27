@@ -155,13 +155,6 @@ class ExplorerView extends HTMLElementBase {
 		this.searchField = this.querySelector('#search');
 
 		this.#renderScrollbar(this.grid, this.querySelector('scrollbar-thumb'));
-
-		// css scroll snapping felt unnatural
-		// this.grid.onscrollend = () => {
-		// 	if (this.grid.scrollTop >= 200) return;
-		// 	this.grid.scrollTo({ top: this.grid.scrollTop < 50 ? 0 : 200, behavior: 'smooth' });
-		// };
-
 	}
 
 	#renderScrollbar(element, thumb) {

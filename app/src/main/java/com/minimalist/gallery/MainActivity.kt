@@ -206,9 +206,14 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 	private fun dispatchBack() {
 		val parent = State.path.substringBeforeLast('/', "")
 
-		if (parent.isEmpty()) {
+		if (State.path == "/") {
 			moveTaskToBack(true)
-		} else {
+		}
+		else if (parent.isEmpty()) {
+			State.path = "/"
+			dispatchListFiles()
+		}
+		else {
 			State.path = parent
 			dispatchListFiles()
 		}
