@@ -10,8 +10,8 @@ class MainView extends HTMLElementBase {
 		window.BASE_IMG_PATH = state.debug ? 'http://localhost/minimalist-gallery/' : 'https://appassets.androidplatform.net/image/';
 		window.BASE_THUMB_PATH = state.debug ? 'http://localhost/minimalist-gallery/' : 'https://appassets.androidplatform.net/thumbnail/';
 
-		window.SAFE_AREA_LEFT = 20;
-		window.SAFE_AREA_RIGHT = window.innerWidth - 20;
+		window.SAFE_AREA_LEFT = 24;
+		window.SAFE_AREA_RIGHT = window.innerWidth - 24;
 
 		if (state.path == '<permission>') {
 			document.startViewTransition(() => this.innerHTML = '<permission-view></permission-view>');
