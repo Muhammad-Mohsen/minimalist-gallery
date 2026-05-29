@@ -6,10 +6,7 @@ class ImageView extends HTMLElementBase {
 	set src(value) {
 		this.setAttribute('src', value);
 		if (!value) return;
-
 		state.image = this.findImage(value);
-		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
-		this.gesture = {}
 
 		this.render();
 	}
@@ -22,11 +19,16 @@ class ImageView extends HTMLElementBase {
 		this.#renderTransforms();
 	}
 	onImageClick() {
-		this.header.classList.toggle('hidden');
-		this.footer.classList.toggle('hidden');
-		this.thumbnailCarousel.classList.toggle('hidden');
+		clearTimeout(this.hideTimeout);
+		this.hideTimeout = setTimeout(() => {
+			[this.header, this.footer, this.thumbnailCarousel, this.infoPanel, this.adjustmentsPanel]
+				.forEach(el => el.toggleClass('hidden'));
+
+		}, 200);
 	}
 	onImageDblClick(img, e) {
+		clearTimeout(this.hideTimeout);
+
 		this.transform = { x: 0, y: 0, rotate: 0 };
 		img.style.transition = '.2s ease-in-out';
 		img.style.translate = '0 0';
@@ -96,13 +98,6 @@ class ImageView extends HTMLElementBase {
 		this.#renderTransforms();
 	}
 
-	onBackClick() {
-		document.startViewTransition({
-			update: () => this.src = '',
-			types: ['back'],
-		});
-	}
-
 	// TOUCH
 	onTouchStart(e, timestamp = Date.now()) {
 		this.gesture.initialTransform = JSON.copy(this.transform);
@@ -122,10 +117,15 @@ class ImageView extends HTMLElementBase {
 		}
 	}
 	onTouchMove(e) {
-		e.stopPropagation();
-
 		const img = this.mainImage;
 
+		if (Array.from(e.touches).find(t => t.target == document)) {
+			// console.log('LEAKED!! LEAKED!! LEAKED!!');
+
+			e.stopPropagation();
+			e.preventDefault();
+			return;
+		}
 		if (e.touches.length != this.gesture.touches) {
 			this.onTouchStart(e, this.gesture.timestamp);
 			return;
@@ -187,11 +187,73 @@ class ImageView extends HTMLElementBase {
 		}
 	}
 
+	// TOOLBAR
+	onBackClick() {
+		document.startViewTransition({
+			update: () => this.src = '',
+			types: ['back'],
+		});
+	}
+	onPanelToggleClick(panel) {
+		if (this.getAttribute('panel') == panel) this.removeAttribute('panel');
+		else this.setAttribute('panel', panel);
+	}
+
+	onAdjustmentToggleClick(adjustment) {
+		// state
+		this.adjustmentsPanel.querySelector('button.active')?.removeClass('active');
+		adjustment.addClass('active');
+		adjustment.scrollIntoView({ inline: 'center', behavior: 'smooth' })
+		this.activeAdjustment = adjustment;
+
+		// value
+		const currentValue = this.adjustmentString.match(`${adjustment.getAttribute('filter')}\\((\\d+).*\\)`)?.[1]
+			|| Number(adjustment.getAttribute('nominal'));
+
+		// range
+		this.adjustmentRange.min = adjustment.getAttribute('min');
+		this.adjustmentRange.max = adjustment.getAttribute('max');
+		this.adjustmentRange.value = currentValue;
+
+		// apply
+		this.onAdjustmentChange();
+
+	}
+	onAdjustmentChange() {
+		const filter = this.activeAdjustment.getAttribute('filter');
+		const currentValue = this.adjustmentRange.value;
+		const unit = this.activeAdjustment.getAttribute('unit') || '%';
+
+		this.adjustmentString = this.adjustmentString.replace(new RegExp(`${filter}\\(\\d+${unit}\\)`), '');
+		this.adjustmentString += ` ${filter}(${currentValue}${unit})`;
+
+		this.mainImage.style.filter = this.adjustmentString;
+	}
+
+	onResetClick() {
+		this.adjustmentString = '';
+		this.onAdjustmentToggleClick(this.querySelector('#adjustments-panel .ic-brightness'));
+	}
+	onSaveClick() {
+		// TODO draw the image + filters on a canvas then download it
+		const link = document.createElement('a');
+		link.download = this.src;
+		link.href = this.mainImage.src;
+		link.click();
+	}
+
+	onSetBackgroundClick() {
+
+	}
+	onShareClick() {
+
+	}
+
 	render() {
 		super.render(`
 			<header id="header">
-				<button id="rotation-value" class="ic-rotate output" data-unit="°" onclick="${this}.onResetRotationClick()">0</button>
-				<button id="scale-value" class="ic-scale output" data-unit="%" onclick="${this}.onActualSizeClick()">100</button>
+				<button id="rotation-value" class="ic-rotate output" unit="°" onclick="${this}.onResetRotationClick()">0</button>
+				<button id="scale-value" class="ic-scale output" unit="%" onclick="${this}.onActualSizeClick()">100</button>
 			</header>
 			<image-carousel id="image-carousel" ontouchstart="${this}.onTouchStart(event);" ontouchmove="${this}.onTouchMove(event);" ontouchend="${this}.onTouchEnd(event);">
 				<img id="main-image" src="${BASE_IMG_PATH}${state.image.path}" loading="lazy" style="transform-origin: 50% 50%"
@@ -206,18 +268,49 @@ class ImageView extends HTMLElementBase {
 				}
 			</thumbnail-carousel>
 
+			<info-panel id="info-panel">${this.#renderInfo()}</info-panel>
+
+			<adjustments-panel id="adjustments-panel">
+				<adjustments-carousel>
+					<button icon class="ic-brightness" aria-label="Brightness" filter="brightness" nominal="100" min="0" max="300" onclick="${this}.onAdjustmentToggleClick(this)"></button>
+					<button icon class="ic-contrast" aria-label="Contrast" filter="contrast" nominal="100" min="0" max="300" onclick="${this}.onAdjustmentToggleClick(this)"></button>
+					<button icon class="ic-saturation" aria-label="Saturation" filter="saturate" nominal="100" min="0" max="300" onclick="${this}.onAdjustmentToggleClick(this)"></button>
+					<button icon class="ic-hue" aria-label="Hue" filter="hue-rotate" unit="deg" nominal="0" min="-180" max="180" onclick="${this}.onAdjustmentToggleClick(this)"></button>
+					<button icon class="ic-invert" aria-label="Invert" filter="invert" nominal="0" min="0" max="100" onclick="${this}.onAdjustmentToggleClick(this)"></button>
+					<button icon class="ic-sepia" aria-label="Sepia" filter="sepia" nominal="0" min="0" max="100" onclick="${this}.onAdjustmentToggleClick(this)"></button>
+					<separator></separator>
+					<button icon class="ic-save" aria-label="Save" onclick="${this}.onSaveClick()"></button>
+					<button icon class="ic-undo-all" aria-label="Reset" onclick="${this}.onResetClick()"></button>
+				</adjustments-carousel>
+
+				<div id="adjustment-range-container">
+					<input type="range" id="adjustment-range" min="0" max="100" value="50" oninput="${this}.onAdjustmentChange()">
+				</div>
+			</adjustments-panel>
+
 			<footer id="footer">
 				<button id="back-button" icon class="ic-arrow-left" onclick="${this}.onBackClick()"></button>
-				<info id="info">
-					${this.#renderInfo()}
-				</info>
+				<button id="info-button" icon class="ic-info" onclick="${this}.onPanelToggleClick('info')"></button>
+				<button id="set-background-button" icon class="ic-background" onclick="${this}.onSetBackgroundClick()"></button>
+				<button id="share-button" icon class="ic-share" onclick="${this}.onShareClick()"></button>
+				<button id="adjustments-button" icon class="ic-brightness" onclick="${this}.onPanelToggleClick('adjustments')"></button>
 			</footer>
 		`);
+
+		// reset the transform + gesture
+		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
+		this.gesture = {}
 
 		// Mark active thumbnail & scroll it into center
 		this.querySelector(`thumbnail-carousel img[src="${BASE_THUMB_PATH}${state.image.path}"]`)
 			.addClass('active')
 			.scrollIntoView({ inline: 'center' });
+
+		// reset the panels
+		this.removeAttribute('panel');
+
+		// activate the brightness
+		this.onAdjustmentToggleClick(this.querySelector('#adjustments-panel .ic-brightness'));
 	}
 
 	#renderInfo() {

@@ -7,6 +7,7 @@
 	--background-translucent: #00000080;
 	--text: #f2f2f2;
 	--text-light: #828282;
+	--text-light-translucent: #5556;
 
 	--accent: #222;
 }
@@ -18,6 +19,7 @@
 		--background-translucent: #FFFFFF80;
 		--text: #000;
 		--text-light: #33333399;
+		--text-light-translucent: #33333399;
 		--accent: #AAA;
 	}
 }
@@ -60,6 +62,4 @@ button[icon] {
 	aspect-ratio: 1;
 	border-radius: 50px;
 	font-size: 24px;
-
-	&:active { scale: .8; }
 }

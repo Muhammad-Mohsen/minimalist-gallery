@@ -6,13 +6,25 @@ image-view {
 
 	&[src=""] { display: none; }
 
+	separator {
+		flex-shrink: 0;
+		width: 1px;
+		height: 12px;
+		background: var(--background-active);
+	}
+
+	.hidden {
+		opacity: 0 !important;
+		pointer-events: none !important;
+	}
+
 	header {
 		position: fixed;
 		inset: var(--safe-area) var(--safe-area) auto auto;
 		display: flex;
 		gap: 12px;
 		z-index: 1;
-		transition: opacity .4s .2s;
+		transition: opacity .4s;
 
 		.output {
 			display: flex;
@@ -25,7 +37,7 @@ image-view {
 			font: 400 12px / 1 system-ui !important;
 
 			&::before { font-family: iconly !important; }
-			&::after { content: attr(data-unit); margin-left: -6px; }
+			&::after { content: attr(unit); margin-left: -6px; }
 		}
 	}
 
@@ -49,7 +61,7 @@ image-view {
 		gap: 8px;
 		height: 60px;
 		overflow: auto;
-		transition: opacity .4s .2s;
+		transition: .4s;
 
 		img {
 			flex-shrink: 0;
@@ -57,6 +69,7 @@ image-view {
 			height: 48px;
 			border-radius: 6px;
 			border: 2px solid var(--background-translucent);
+			backdrop-filter: blur(4px);
 			object-fit: cover;
 			transition: scale .2s;
 
@@ -67,6 +80,128 @@ image-view {
 		}
 	}
 
+	info-panel {
+		position: fixed;
+		inset: auto var(--safe-area) 88px;
+		width: fit-content;
+		max-width: calc(100% - 2 * var(--safe-area));
+		margin-inline: auto;
+		padding: 8px;
+		border-radius: 6px;
+		background: var(--background-translucent);
+		backdrop-filter: blur(4px);
+
+		translate: -8vw 0;
+		opacity: 0;
+		pointer-events: none;
+		transition: .4s;
+
+		h1, span {
+			display: block;
+			color: var(--text);
+			font: 400 14px / 1.2 system-ui;
+			word-wrap: break-word;
+		}
+		span {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			margin-top: 8px;
+			color: var(--text-light);
+			font: 400 10px / 1 system-ui;
+
+			separator { height: 8px; }
+		}
+	}
+
+	adjustments-panel {
+		position: fixed;
+		inset: auto 0 88px;
+		translate: -8vw 0;
+		opacity: 0;
+		pointer-events: none;
+		transition: .4s;
+
+		adjustments-carousel {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			padding-block: 20px 16px;
+			overflow: auto;
+			scrollbar-width: none;
+		}
+
+		button[icon] {
+			flex-shrink: 0;
+			position: relative;
+			color: var(--text-light);
+			background: var(--background-translucent);
+			backdrop-filter: blur(4px);
+
+			&:first-child { margin-left: calc(50% - 24px); }
+			&:last-child { margin-right: calc(50% - 24px); }
+
+			&::after {
+				content: attr(aria-label);
+				position: absolute;
+				inset: 0 0 auto;
+				font: 400 11px / 1 system-ui;
+				opacity: 0;
+				translate: 0 -12px;
+				transition: opacity .4s, translate .4s;
+			}
+
+			&.active {
+				color: var(--text);
+				background: var(--background-active);
+
+				&::after {
+					opacity: 1;
+					translate: 0 -20px;
+				}
+			}
+		}
+
+		#adjustment-range-container {
+			position: relative;
+			width: calc(100% - 2 * var(--safe-area));
+			height: 20px;
+			margin: 0 var(--safe-area);
+
+			/* notches */
+			&::after {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background:
+					repeating-linear-gradient(to right, var(--text-light) 0 1px, transparent 1px 2%) center / 100% 10% no-repeat,
+					repeating-linear-gradient(to right, var(--text-light) 0 1px, transparent 1px 10%) center / 100% 40% no-repeat;
+				clip-path: inset(4px round 50px);
+				pointer-events: none;
+			}
+		}
+		#adjustment-range {
+			appearance: none;
+			width: 100%;
+			height: 100%;
+			outline: none;
+			border-radius: 50px;
+			background-color: var(--background-translucent);
+			backdrop-filter: blur(4px);
+			overflow: hidden;
+
+			&::-webkit-slider-thumb {
+				appearance: none;
+				height: 20px;
+				width: 20px;
+				border-radius: 50px;
+				background: var(--background-active);
+				box-shadow: -100vw 0 0 calc(100vw - 10px) var(--background-active);
+				z-index: -1;
+			}
+		}
+	}
+
 	footer {
 		position: fixed;
 		inset: auto auto var(--safe-area) 50%;
@@ -74,40 +209,33 @@ image-view {
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 4px 24px 4px 4px;
+		padding: 4px;
 		border-radius: 28px;
 		background: var(--background-light);
-		transition: opacity .4s .2s;
+		transition: opacity .4s;
 
-		#back-button {
+		button {
 			flex-shrink: 0;
-			background: radial-gradient(var(--background-active) 20px, var(--background-light) 20px);
+			color: var(--text-light);
 		}
-		info {
-			h1, span {
-				display: block;
-				max-width: 70vw;
-				color: var(--text);
-				font: 400 14px / 1.2 system-ui;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-				overflow: hidden;
-			}
-			span {
-				display: flex;
-				align-items: center;
-				gap: 8px;
-				color: var(--text-light);
-				font: 400 10px / 1.5 system-ui;
-
-				separator {
-					width: 1px;
-					height: 8px;
-					background: var(--background-active);
-				}
-			}
+		#back-button {
+			color: var(--text);
+			background: radial-gradient(var(--background-active) 20px, var(--background-light) 20px);
 		}
 	}
 
-	.hidden { opacity: 0; pointer-events: none; }
+	/* STATES */
+	&[panel="info"] info-panel,
+	&[panel="adjustments"] adjustments-panel {
+		translate: 0;
+		opacity: 1;
+		pointer-events: all;
+	}
+
+	&[panel="info"] thumbnail-carousel,
+	&[panel="adjustments"] thumbnail-carousel {
+		translate: -8vw 0;
+		opacity: 0;
+		pointer-events: none;
+	}
 }
