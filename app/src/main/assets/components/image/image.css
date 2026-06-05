@@ -218,6 +218,10 @@ image-view {
 			flex-shrink: 0;
 			color: var(--text-light);
 		}
+		.ic-share::before {
+			display: block;
+			scale: .95;
+		}
 		#back-button {
 			color: var(--text);
 			background: radial-gradient(var(--background-active) 20px, var(--background-light) 20px);
@@ -229,7 +233,7 @@ image-view {
 	&[panel="adjustments"] adjustments-panel {
 		translate: 0;
 		opacity: 1;
-		pointer-events: all;
+		pointer-events: auto;
 	}
 
 	&[panel="info"] thumbnail-carousel,

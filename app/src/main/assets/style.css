@@ -13,12 +13,12 @@
 }
 @media (prefers-color-scheme: light) {
 	:root {
-		--background: #DDD;
-		--background-light: #FFF;
-		--background-active: #DDD;
+		--background: #FFF;
+		--background-light: #DDD;
+		--background-active: #BBB;
 		--background-translucent: #FFFFFF80;
 		--text: #000;
-		--text-light: #33333399;
+		--text-light: #444;
 		--text-light-translucent: #33333399;
 		--accent: #AAA;
 	}

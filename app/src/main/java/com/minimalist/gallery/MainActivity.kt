@@ -5,7 +5,9 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.provider.Settings
 import android.view.PixelCopy
 import android.view.View
@@ -14,18 +16,20 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.createBitmap
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import com.minimalist.gallery.data.EXTERNAL_STORAGE_PATH
 import com.minimalist.gallery.data.FileSystem
 import com.minimalist.gallery.data.LocalAssetLoader
+import com.minimalist.gallery.data.LocalDownloadListener
 import com.minimalist.gallery.data.SortBy
 import com.minimalist.gallery.data.State
 import com.minimalist.gallery.foundation.DispatchQueue
-import com.minimalist.gallery.data.EXTERNAL_STORAGE_PATH
 import com.minimalist.gallery.foundation.EventBus
 import com.minimalist.gallery.foundation.EventBus.Event
 import com.minimalist.gallery.foundation.EventBus.Target
@@ -112,6 +116,9 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 		WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
 		webView?.apply {
+			isLongClickable = false
+			setOnLongClickListener { true }
+
 			// resizing to account for IME
 			ViewCompat.setOnApplyWindowInsetsListener(this) { v, windowInsets ->
 				val insets = windowInsets.getInsets(WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.systemBars())
@@ -129,6 +136,11 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 				domStorageEnabled = true
 				allowFileAccess = true // Needed for some internal things, but we use AssetLoader for main content
 			}
+
+			setDownloadListener(LocalDownloadListener {
+				saveImageData = it
+				saveAsRequest.launch("image.png")
+			})
 
 			val assetLoader = LocalAssetLoader(this@MainActivity)
 			webViewClient = object : android.webkit.WebViewClient() {
@@ -162,17 +174,10 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 				State.sort = event.data["sort"] as? String ?: SortBy.AZ
 				dispatchListFiles(true)
 			}
+			Type.SET_BACKGROUND -> setAsBackground(event)
+			Type.SHARE_IMAGE -> shareImage(event)
+			Type.DELETE_IMAGE -> deleteImage(event)
 		}
-	}
-
-	/* BACK PRESS */
-	private fun handleBackPress() {
-		onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-			override fun handleOnBackPressed() {
-				EventBus.dispatch(Event(Type.BACK, Target.NATIVE))
-				// dispatchBack()
-			}
-		})
 	}
 
 	/* PERMISSIONS */
@@ -188,6 +193,66 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 			startActivity(intent)
 		}
 		else permissionRequest.launch(DISK_PERMISSION)
+	}
+
+	/* ACTIONS */
+	// back
+	private fun handleBackPress() {
+		onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+			override fun handleOnBackPressed() {
+				EventBus.dispatch(Event(Type.BACK, Target.NATIVE))
+				// dispatchBack()
+			}
+		})
+	}
+	// save
+	var saveImageData: ByteArray? = null
+	val saveAsRequest = registerForActivityResult(ActivityResultContracts.CreateDocument("image/*")) { uri ->
+		if (uri != null && saveImageData != null) {
+			contentResolver.openOutputStream(uri)?.use { outputStream ->
+				outputStream.write(saveImageData)
+				outputStream.flush()
+				saveImageData = null
+			}
+		}
+	}
+	// share
+	fun shareImage(event: Event) {
+		val path = event.data["path"] as? String ?: return
+
+		val shareIntent = Intent(Intent.ACTION_SEND).apply {
+			type = "image/*"
+			putExtra(Intent.EXTRA_STREAM, FileSystem.uriFrom(path))
+			addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+		}
+
+		val chooserIntent = Intent.createChooser(shareIntent, "Share Image")
+		startActivity(chooserIntent)
+	}
+	// background
+	fun setAsBackground(event: Event) {
+		val path = event.data["path"] as? String ?: return
+
+		val intent = Intent(Intent.ACTION_SET_WALLPAPER).apply {
+			// We pass the data and grant permissions so the system UI can access it
+			setDataAndType(FileSystem.uriFrom(path), "image/*")
+			addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+		}
+
+		val chooserIntent = Intent.createChooser(intent, "Set As Wallpaper")
+		startActivity(chooserIntent)
+	}
+	// delete
+	val deleteLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+		if (result.resultCode == RESULT_OK) dispatchListFiles(true)
+	}
+	fun deleteImage(event: Event) {
+		val paths = (event.data["paths"] as ArrayList<*>).filterIsInstance<String>()
+		val pendingIntent = MediaStore.createTrashRequest(contentResolver, paths.map { path -> FileSystem.uriFrom(path) }, true)
+
+		// Launch the system prompt
+		val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+		deleteLauncher.launch(intentSenderRequest)
 	}
 
 	/* UTILS */
@@ -220,7 +285,7 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 	}
 
 	companion object {
-		private val DISK_PERMISSION = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES
+		private val DISK_PERMISSION = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES
 		else Manifest.permission.READ_EXTERNAL_STORAGE
 
 		private const val PERMISSION_PATH = "<permission>"

@@ -6,6 +6,10 @@ class EventBus {
 		REQUEST_PERMISSION: 'requestPermission',
 		LIST_FILES: 'listFiles',
 		SORT_BY: 'sortBy',
+		SAVE_IMAGE: 'saveImage',
+		SET_BACKGROUND: 'setBackground',
+		SHARE_IMAGE: 'shareImage',
+		DELETE_IMAGE: 'deleteImage',
 	};
 
 	// the event `target` (read: source)

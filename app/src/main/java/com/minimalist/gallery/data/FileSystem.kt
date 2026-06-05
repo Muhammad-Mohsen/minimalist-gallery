@@ -1,6 +1,8 @@
 package com.minimalist.gallery.data
 
+import android.content.ContentUris
 import android.content.Context
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.storage.StorageManager
@@ -120,16 +122,18 @@ object FileSystem {
 	private fun resolveVirtualRoot(context: Context, path: String): Array<File>? {
 		return when (path) {
 			"/" -> arrayOf(File("/storage"))
-			"/storage" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) listVolumes(context)
-			else arrayOf(File("/storage/emulated"))
+			"/storage" -> listVolumes(context)
 			"/storage/emulated" -> arrayOf(File("/storage/emulated/0"))
 			else -> null
 		}
 	}
 
+	fun uriFrom(path: String): Uri {
+		return ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, path.toLong())
+	}
+
 	// After the scoped storage changes, we can't access the SD card from "/storage".listFiles() anymore :)
 	// this little guy returns them nonetheless
-	@RequiresApi(Build.VERSION_CODES.R)
 	private fun listVolumes(context: Context): Array<File> {
 		val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
 		return ArrayList(storageManager.storageVolumes.mapNotNull {

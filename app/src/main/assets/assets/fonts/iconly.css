@@ -28,7 +28,7 @@
 .ic-moon:before { content: "\e004"; }
 .ic-folder:before { content: "\e005"; }
 .ic-arrow-left:before { content: "\e006"; }
-.ic-trash-1:before { content: "\e007"; }
+.ic-trash:before { content: "\e007"; }
 .ic-share:before { content: "\e008"; }
 .ic-pencil:before { content: "\e009"; }
 .ic-heart:before { content: "\e00a"; }

@@ -200,6 +200,8 @@ class ImageView extends HTMLElementBase {
 	}
 
 	onAdjustmentToggleClick(adjustment) {
+		const reset = this.activeAdjustment == adjustment;
+
 		// state
 		this.adjustmentsPanel.querySelector('button.active')?.removeClass('active');
 		adjustment.addClass('active');
@@ -207,8 +209,10 @@ class ImageView extends HTMLElementBase {
 		this.activeAdjustment = adjustment;
 
 		// value
-		const currentValue = this.adjustmentString.match(`${adjustment.getAttribute('filter')}\\((\\d+).*\\)`)?.[1]
-			|| Number(adjustment.getAttribute('nominal'));
+		const nominal = Number(adjustment.getAttribute('nominal'));
+		const currentValue = reset
+			? nominal
+			: (this.adjustmentString.match(`${adjustment.getAttribute('filter')}\\((-?\\d+).*\\)`)?.[1] || nominal);
 
 		// range
 		this.adjustmentRange.min = adjustment.getAttribute('min');
@@ -224,7 +228,7 @@ class ImageView extends HTMLElementBase {
 		const currentValue = this.adjustmentRange.value;
 		const unit = this.activeAdjustment.getAttribute('unit') || '%';
 
-		this.adjustmentString = this.adjustmentString.replace(new RegExp(`${filter}\\(\\d+${unit}\\)`), '');
+		this.adjustmentString = this.adjustmentString.replace(new RegExp(`${filter}\\(-?\\d+${unit}\\)`), '');
 		this.adjustmentString += ` ${filter}(${currentValue}${unit})`;
 
 		this.mainImage.style.filter = this.adjustmentString;
@@ -235,18 +239,58 @@ class ImageView extends HTMLElementBase {
 		this.onAdjustmentToggleClick(this.querySelector('#adjustments-panel .ic-brightness'));
 	}
 	onSaveClick() {
-		// TODO draw the image + filters on a canvas then download it
+		const canvas = document.createElement('canvas');
+		canvas.width = this.mainImage.naturalWidth;
+		canvas.height = this.mainImage.naturalHeight;
+
+		const ctx = canvas.getContext('2d');
+		ctx.filter = this.adjustmentString;
+
+		ctx.drawImage(this.mainImage, 0, 0, canvas.width, canvas.height);
+
+		const extension = state.image.name.split('.').pop();
+		const dataURL = canvas.toDataURL(`image/${extension}`, 0.95);
+
 		const link = document.createElement('a');
-		link.download = this.src;
-		link.href = this.mainImage.src;
+		link.href = dataURL;
+		link.download = `Edited_${state.image.name}`;
 		link.click();
 	}
 
 	onSetBackgroundClick() {
-
+		EventBus.dispatch({
+			type: EventBus.Type.SET_BACKGROUND,
+			target: EventBus.Target.JS,
+			data: { path: state.image.path }
+		});
 	}
 	onShareClick() {
+		EventBus.dispatch({
+			type: EventBus.Type.SHARE_IMAGE,
+			target: EventBus.Target.JS,
+			data: { path: state.image.path }
+		});
+	}
+	onDeleteClick() {
+		EventBus.dispatch({
+			type: EventBus.Type.DELETE_IMAGE,
+			target: EventBus.Target.JS,
+			data: { paths: [state.image.path] }
+		});
+	}
 
+	getFilteredBase64() {
+		const canvas = document.createElement('canvas');
+		canvas.width = this.mainImage.naturalWidth;
+		canvas.height = this.mainImage.naturalHeight;
+
+		const ctx = canvas.getContext('2d');
+		ctx.filter = this.adjustmentString;
+
+		ctx.drawImage(this.mainImage, 0, 0, canvas.width, canvas.height);
+
+		const extension = state.image.name.split('.').pop();
+		return canvas.toDataURL(`image/${extension}`, 0.95);
 	}
 
 	render() {
@@ -290,16 +334,18 @@ class ImageView extends HTMLElementBase {
 
 			<footer id="footer">
 				<button id="back-button" icon class="ic-arrow-left" onclick="${this}.onBackClick()"></button>
-				<button id="info-button" icon class="ic-info" onclick="${this}.onPanelToggleClick('info')"></button>
-				<button id="set-background-button" icon class="ic-background" onclick="${this}.onSetBackgroundClick()"></button>
-				<button id="share-button" icon class="ic-share" onclick="${this}.onShareClick()"></button>
-				<button id="adjustments-button" icon class="ic-brightness" onclick="${this}.onPanelToggleClick('adjustments')"></button>
+				<button icon class="ic-info" onclick="${this}.onPanelToggleClick('info')"></button>
+				<button icon class="ic-brightness" onclick="${this}.onPanelToggleClick('adjustments')"></button>
+				<button icon class="ic-background" onclick="${this}.onSetBackgroundClick()"></button>
+				<button icon class="ic-share" onclick="${this}.onShareClick()"></button>
+				<button icon class="ic-trash" onclick="${this}.onDeleteClick()"></button>
 			</footer>
 		`);
 
-		// reset the transform + gesture
+		// reset the transform + gesture + adjustments
 		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
-		this.gesture = {}
+		this.gesture = {};
+		this.adjustmentString = '';
 
 		// Mark active thumbnail & scroll it into center
 		this.querySelector(`thumbnail-carousel img[src="${BASE_THUMB_PATH}${state.image.path}"]`)

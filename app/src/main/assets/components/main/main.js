@@ -9,9 +9,12 @@ class MainView extends HTMLElementBase {
 
 		window.BASE_IMG_PATH = state.debug ? 'http://localhost/minimalist-gallery/' : 'https://appassets.androidplatform.net/image/';
 		window.BASE_THUMB_PATH = state.debug ? 'http://localhost/minimalist-gallery/' : 'https://appassets.androidplatform.net/thumbnail/';
+		window.SAVE_PATH = 'https://appassets.androidplatform.net/save';
 
 		window.SAFE_AREA_LEFT = 24;
 		window.SAFE_AREA_RIGHT = window.innerWidth - 24;
+		window.LONG_PRESS = 500;
+		window.LONG_PRESS_MOVE = 10;
 
 		if (state.path == '<permission>') {
 			document.startViewTransition(() => this.innerHTML = '<permission-view></permission-view>');
@@ -71,6 +74,7 @@ class MainView extends HTMLElementBase {
 					update: () => this.imageView.src = '',
 					types: ['back'],
 				});
+				else if (this.explorerView.getAttribute('mode') == 'select') this.explorerView.onCancelSelectModeClick();
 				else this.explorerView.onBackClick();
 			})
 			.otherwise(() => {

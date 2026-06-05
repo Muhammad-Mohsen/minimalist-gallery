@@ -70,6 +70,10 @@ object EventBus {
 		const val PERMISSION_VIEW = "permissionView"
 		const val LIST_FILES = "listFiles"
 		const val SORT_BY = "sortBy"
+		const val SAVE_IMAGE = "saveImage"
+		const val SET_BACKGROUND = "setBackground"
+		const val SHARE_IMAGE = "shareImage"
+		const val DELETE_IMAGE = "deleteImage"
 	}
 
 	object Target {
