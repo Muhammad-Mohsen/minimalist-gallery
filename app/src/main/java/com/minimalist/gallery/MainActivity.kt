@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Base64
 import android.view.PixelCopy
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +27,6 @@ import androidx.core.view.WindowInsetsCompat
 import com.minimalist.gallery.data.EXTERNAL_STORAGE_PATH
 import com.minimalist.gallery.data.FileSystem
 import com.minimalist.gallery.data.LocalAssetLoader
-import com.minimalist.gallery.data.LocalDownloadListener
 import com.minimalist.gallery.data.SortBy
 import com.minimalist.gallery.data.State
 import com.minimalist.gallery.foundation.DispatchQueue
@@ -137,11 +137,6 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 				allowFileAccess = true // Needed for some internal things, but we use AssetLoader for main content
 			}
 
-			setDownloadListener(LocalDownloadListener {
-				saveImageData = it
-				saveAsRequest.launch("image.png")
-			})
-
 			val assetLoader = LocalAssetLoader(this@MainActivity)
 			webViewClient = object : android.webkit.WebViewClient() {
 				override fun shouldInterceptRequest(view: WebView, request: android.webkit.WebResourceRequest): WebResourceResponse? {
@@ -177,6 +172,7 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 			Type.SET_BACKGROUND -> setAsBackground(event)
 			Type.SHARE_IMAGE -> shareImage(event)
 			Type.DELETE_IMAGE -> deleteImage(event)
+			Type.SAVE_IMAGE -> saveImage(event)
 		}
 	}
 
@@ -215,6 +211,11 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 				saveImageData = null
 			}
 		}
+	}
+	fun saveImage(event: Event) {
+		val base64Data = (event.data["dataURL"] as String).substringAfter("base64,")
+		saveImageData = Base64.decode(base64Data, Base64.DEFAULT)
+		saveAsRequest.launch(event.data["name"] as String)
 	}
 	// share
 	fun shareImage(event: Event) {

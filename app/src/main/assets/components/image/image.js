@@ -251,10 +251,11 @@ class ImageView extends HTMLElementBase {
 		const extension = state.image.name.split('.').pop();
 		const dataURL = canvas.toDataURL(`image/${extension}`, 0.95);
 
-		const link = document.createElement('a');
-		link.href = dataURL;
-		link.download = `Edited_${state.image.name}`;
-		link.click();
+		EventBus.dispatch({
+			type: EventBus.Type.SAVE_IMAGE,
+			target: EventBus.Target.JS,
+			data: { dataURL, name: `Edited_${state.image.name}` }
+		});
 	}
 
 	onSetBackgroundClick() {
