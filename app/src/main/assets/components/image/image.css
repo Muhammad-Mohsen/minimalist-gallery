@@ -10,7 +10,7 @@ image-view {
 		flex-shrink: 0;
 		width: 1px;
 		height: 12px;
-		background: var(--background-active);
+		background: var(--text-light);
 	}
 
 	.hidden {
@@ -55,13 +55,16 @@ image-view {
 
 	thumbnail-carousel {
 		position: fixed;
-		inset: auto 0 calc(var(--safe-area) + 56px + 8px) 0;
+		inset: auto 0 calc(var(--safe-area) + 56px + 16px) 0;
 		display: flex;
 		align-items: center;
 		gap: 8px;
 		height: 60px;
 		overflow: auto;
 		transition: .4s;
+
+		content-visibility: auto;
+		contain-intrinsic-size: 40px;
 
 		img {
 			flex-shrink: 0;
@@ -72,6 +75,8 @@ image-view {
 			backdrop-filter: blur(4px);
 			object-fit: cover;
 			transition: scale .2s;
+			content-visibility: auto;
+  			contain-intrinsic-size: 60px;
 
 			&.active { scale: 1.25; }
 
@@ -91,7 +96,7 @@ image-view {
 		background: var(--background-translucent);
 		backdrop-filter: blur(4px);
 
-		translate: -8vw 0;
+		translate: -12vw 0;
 		opacity: 0;
 		pointer-events: none;
 		transition: .4s;
@@ -106,7 +111,7 @@ image-view {
 			display: flex;
 			align-items: center;
 			gap: 8px;
-			margin-top: 8px;
+			margin-top: 4px;
 			color: var(--text-light);
 			font: 400 10px / 1 system-ui;
 
@@ -116,8 +121,8 @@ image-view {
 
 	adjustments-panel {
 		position: fixed;
-		inset: auto 0 88px;
-		translate: -8vw 0;
+		inset: auto 0 92px;
+		translate: -12vw 0;
 		opacity: 0;
 		pointer-events: none;
 		transition: .4s;
@@ -238,7 +243,7 @@ image-view {
 
 	&[panel="info"] thumbnail-carousel,
 	&[panel="adjustments"] thumbnail-carousel {
-		translate: -8vw 0;
+		translate: -12vw 0;
 		opacity: 0;
 		pointer-events: none;
 	}
