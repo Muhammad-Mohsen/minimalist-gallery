@@ -70,7 +70,7 @@ class ImageView extends HTMLElementBase {
 		img.addClass('active').scrollIntoView({ inline: 'center', behavior: 'smooth' });
 
 		// update info
-		this.info.innerHTML = this.#renderInfo();
+		this.infoPanel.innerHTML = this.#renderInfo();
 	}
 
 	onResetRotationClick() {
