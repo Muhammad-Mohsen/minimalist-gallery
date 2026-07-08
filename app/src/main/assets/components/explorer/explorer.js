@@ -119,6 +119,9 @@ class ExplorerView extends HTMLElementBase {
 	onThumbnailError(img) {
 		img.src = 'assets/error-fallback.png';
 	}
+	scrollToImg(src) {
+		this.querySelector(`img[src="${src}"]`)?.scrollIntoView({ block: 'center' });
+	}
 
 	// NAVBAR
 	onCrumbClick(event) {
