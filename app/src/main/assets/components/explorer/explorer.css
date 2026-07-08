@@ -159,8 +159,6 @@ explorer-view {
 
 			transition: .4s;
 
-			content-visibility: auto;
-
 			&:active { scale: .9; }
 		}
 

@@ -1,7 +1,7 @@
 # Tasks
 ## Phase I
 - stream mediastore query to frontend
-- refresh button
+- DONE - refresh button
 - DONE - starting animation
 - DONE - fetch failures
 - DONE - performance revisited
@@ -73,9 +73,9 @@ img {
 ```
 
 ## Phase II
-- edit images (prompt user to save copy, no write permission needed)
+- DONE - edit images (prompt user to save copy, no write permission needed)
 - write permission?
-	- delete
+	- DONE - delete
 	- move
 	- copy
 	- rename
@@ -83,3 +83,29 @@ img {
 - grid view options
 	- masonry
 	- uniform
+
+- use virtual scrolling (at least for the thumbnails because they are slow when translating in and out)
+
+- replace @JavascriptInterface with postMessage
+// Restrict to trusted domains for security
+val allowedOrigins = setOf("https://androidplatform.net") // or setOf("*")
+
+WebViewCompat.addWebMessageListener(
+	webView,
+	"nativeBridge", // Object name exposed to JavaScript
+	allowedOrigins
+) { view, message, sourceOrigin, isMainFrame, replyProxy ->
+	// Executed asynchronously when JS sends a message
+	val dataFromJs = message.data
+
+	// Process data, then reply back asynchronously if needed
+	replyProxy.postMessage("Success from Android!")
+}
+
+// Automatically returns a promise/reply mechanism
+nativeBridge.postMessage("Hello Native App!");
+
+// To capture the asynchronous response from Android:
+nativeBridge.onmessage = function(event) {
+	console.log("Received from Android:", event.data);
+};

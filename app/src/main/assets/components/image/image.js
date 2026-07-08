@@ -24,7 +24,7 @@ class ImageView extends HTMLElementBase {
 			[this.header, this.footer, this.thumbnailCarousel, this.infoPanel, this.adjustmentsPanel]
 				.forEach(el => el.toggleClass('hidden'));
 
-		}, 200);
+		}, 350); // 300ms is the default (from ViewConfiguration.getDoubleTapTimeout)
 	}
 	onImageDblClick(img, e) {
 		clearTimeout(this.hideTimeout);
