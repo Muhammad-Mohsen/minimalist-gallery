@@ -69,6 +69,9 @@ class ImageView extends HTMLElementBase {
 		this.querySelector('thumbnail-carousel img.active')?.removeClass('active');
 		img.addClass('active').scrollIntoView({ inline: 'center', behavior: 'smooth' });
 
+		// scroll the explorer to the current image
+		this.parentElement.explorerView.scrollToImg(BASE_THUMB_PATH + state.image.path);
+
 		// update info
 		this.infoPanel.innerHTML = this.#renderInfo();
 	}
@@ -120,8 +123,6 @@ class ImageView extends HTMLElementBase {
 		const img = this.mainImage;
 
 		if (Array.from(e.touches).find(t => t.target == document)) {
-			// console.log('LEAKED!! LEAKED!! LEAKED!!');
-
 			e.stopPropagation();
 			e.preventDefault();
 			return;
@@ -228,14 +229,13 @@ class ImageView extends HTMLElementBase {
 		const currentValue = this.adjustmentRange.value;
 		const unit = this.activeAdjustment.getAttribute('unit') || '%';
 
-		this.adjustmentString = this.adjustmentString.replace(new RegExp(`${filter}\\(-?\\d+${unit}\\)`), '');
-		this.adjustmentString += ` ${filter}(${currentValue}${unit})`;
-
+		// I can probably just replace the value rather than the whole filter string
+		this.adjustmentString = this.adjustmentString.replace(new RegExp(`${filter}\\(-?\\d+${unit}\\)`), `${filter}(${currentValue}${unit})`);
 		this.mainImage.style.filter = this.adjustmentString;
 	}
 
 	onResetClick() {
-		this.adjustmentString = '';
+		this.adjustmentString = 'brightness(100%) contrast(100%) saturate(100%) hue-rotate(0deg) invert(0%) sepia(0%)';;
 		this.onAdjustmentToggleClick(this.querySelector('#adjustments-panel .ic-brightness'));
 	}
 	onSaveClick() {
@@ -278,20 +278,6 @@ class ImageView extends HTMLElementBase {
 			target: EventBus.Target.JS,
 			data: { paths: [state.image.path] }
 		});
-	}
-
-	getFilteredBase64() {
-		const canvas = document.createElement('canvas');
-		canvas.width = this.mainImage.naturalWidth;
-		canvas.height = this.mainImage.naturalHeight;
-
-		const ctx = canvas.getContext('2d');
-		ctx.filter = this.adjustmentString;
-
-		ctx.drawImage(this.mainImage, 0, 0, canvas.width, canvas.height);
-
-		const extension = state.image.name.split('.').pop();
-		return canvas.toDataURL(`image/${extension}`, 0.95);
 	}
 
 	render() {
@@ -346,7 +332,7 @@ class ImageView extends HTMLElementBase {
 		// reset the transform + gesture + adjustments
 		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
 		this.gesture = {};
-		this.adjustmentString = '';
+		this.adjustmentString = 'brightness(100%) contrast(100%) saturate(100%) hue-rotate(0deg) invert(0%) sepia(0%)';
 
 		// Mark active thumbnail & scroll it into center
 		this.querySelector(`thumbnail-carousel img[src="${BASE_THUMB_PATH}${state.image.path}"]`)
