@@ -267,9 +267,9 @@ class ImageView extends HTMLElementBase {
 	}
 	onShareClick() {
 		EventBus.dispatch({
-			type: EventBus.Type.SHARE_IMAGE,
+			type: EventBus.Type.SHARE_IMAGES,
 			target: EventBus.Target.JS,
-			data: { path: state.image.path }
+			data: { paths: [state.image.path] }
 		});
 	}
 	onDeleteClick() {

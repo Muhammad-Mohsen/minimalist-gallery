@@ -49,6 +49,10 @@ class ExplorerView extends HTMLElementBase {
 		EventBus.dispatch({ type: EventBus.Type.DELETE_IMAGE, target: EventBus.Target.JS, data: { paths: state.selection } });
 		this.onCancelSelectModeClick();
 	}
+	onShareClick() {
+        EventBus.dispatch({ type: EventBus.Type.SHARE_IMAGES, target: EventBus.Target.JS, data: { paths: state.selection } });
+        this.onCancelSelectModeClick();
+    }
 
 	// GRID
 	onImageTouchStart(event) {
@@ -155,6 +159,7 @@ class ExplorerView extends HTMLElementBase {
 				<selection-actions>
 					<button icon class="ic-arrow-left" id="back-button" onclick="${this}.onCancelSelectModeClick()"></button>
 					<h2><span id="selection-count"></span> Selected</h2>
+					<button icon class="ic-share" onclick="${this}.onShareClick()"></button>
 					<button icon class="ic-trash" onclick="${this}.onDeleteClick()"></button>
 				</selection-actions>
 

@@ -2,6 +2,7 @@ package com.minimalist.gallery
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -170,7 +171,7 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 				dispatchListFiles(true)
 			}
 			Type.SET_BACKGROUND -> setAsBackground(event)
-			Type.SHARE_IMAGE -> shareImage(event)
+			Type.SHARE_IMAGES -> shareImages(event)
 			Type.DELETE_IMAGE -> deleteImage(event)
 			Type.SAVE_IMAGE -> saveImage(event)
 		}
@@ -218,16 +219,21 @@ class MainActivity : AppCompatActivity(), EventBus.Subscriber {
 		saveAsRequest.launch(event.data["name"] as String)
 	}
 	// share
-	fun shareImage(event: Event) {
-		val path = event.data["path"] as? String ?: return
+	fun shareImages(event: Event) {
+		val paths = (event.data["paths"] as ArrayList<*>).filterIsInstance<String>()
+		val imageUris: ArrayList<Uri> = ArrayList(paths.map { path -> FileSystem.uriFrom(path) })
 
-		val shareIntent = Intent(Intent.ACTION_SEND).apply {
+		val shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
 			type = "image/*"
-			putExtra(Intent.EXTRA_STREAM, FileSystem.uriFrom(path))
+			putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
 			addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+			clipData = ClipData.newRawUri("Shared Images", imageUris.first()).apply {
+				for (i in 1 until imageUris.size) addItem(ClipData.Item(imageUris[i]))
+			}
 		}
 
-		val chooserIntent = Intent.createChooser(shareIntent, "Share Image")
+		val chooserIntent = Intent.createChooser(shareIntent, "Share Images")
 		startActivity(chooserIntent)
 	}
 	// background

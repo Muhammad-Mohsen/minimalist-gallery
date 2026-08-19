@@ -93,6 +93,11 @@ explorer-view {
 				}
 			}
 		}
+
+		.ic-share::before {
+            display: block;
+            scale: .95;
+        }
 	}
 
 	grid {

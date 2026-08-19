@@ -72,7 +72,7 @@ object EventBus {
 		const val SORT_BY = "sortBy"
 		const val SAVE_IMAGE = "saveImage"
 		const val SET_BACKGROUND = "setBackground"
-		const val SHARE_IMAGE = "shareImage"
+		const val SHARE_IMAGES = "shareImages"
 		const val DELETE_IMAGE = "deleteImage"
 	}
 

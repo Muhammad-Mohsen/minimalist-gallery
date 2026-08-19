@@ -8,7 +8,7 @@ class EventBus {
 		SORT_BY: 'sortBy',
 		SAVE_IMAGE: 'saveImage',
 		SET_BACKGROUND: 'setBackground',
-		SHARE_IMAGE: 'shareImage',
+		SHARE_IMAGES: 'shareImages',
 		DELETE_IMAGE: 'deleteImage',
 	};
 
