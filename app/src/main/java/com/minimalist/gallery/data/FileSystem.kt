@@ -3,11 +3,9 @@ package com.minimalist.gallery.data
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.os.storage.StorageManager
 import android.provider.MediaStore
-import androidx.annotation.RequiresApi
 import java.io.File
 
 val EXTERNAL_STORAGE_PATH: String = Environment.getExternalStorageDirectory().path

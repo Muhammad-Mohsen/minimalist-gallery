@@ -225,7 +225,6 @@ class ExplorerView extends HTMLElementBase {
 
 		this.#renderScrollbar(this.grid, this.querySelector('scrollbar-thumb'));
 	}
-
 	#renderScrollbar(element, thumb) {
 		const HIDE_DELAY = 2000;
 		let hideTimeout;

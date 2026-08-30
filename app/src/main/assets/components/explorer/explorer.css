@@ -299,14 +299,12 @@ explorer-view {
 				pointer-events: none;
 			}
 			img {
-				position: relative;
 				opacity: .3;
 				filter: grayscale(100%);
 			}
 			img[selected] {
 				opacity: 1;
 				filter: none;
-				/* border: 2px solid var(--text); */
 			}
 		}
 
