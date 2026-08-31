@@ -48,3 +48,6 @@
 .ic-background:before { content: "\e018"; }
 .ic-save:before { content: "\e019"; }
 .ic-undo-all:before { content: "\e01a"; }
+.ic-flip-v:before { content: "\e01b"; }
+.ic-flip-h:before { content: "\e01c"; }
+.ic-crop:before { content: "\e01d"; }

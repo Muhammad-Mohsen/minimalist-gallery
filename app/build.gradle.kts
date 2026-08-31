@@ -14,8 +14,8 @@ android {
 		applicationId = "com.minimalist.gallery"
 		minSdk = 30
 		targetSdk = 36
-		versionCode = 8
-		versionName = "2.3"
+		versionCode = 10
+		versionName = "2.4"
 	}
 
 	compileOptions {

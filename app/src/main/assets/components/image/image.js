@@ -213,7 +213,7 @@ class ImageView extends HTMLElementBase {
 		const nominal = Number(adjustment.getAttribute('nominal'));
 		const currentValue = reset
 			? nominal
-			: (this.adjustmentString.match(`${adjustment.getAttribute('filter')}\\((-?\\d+).*\\)`)?.[1] || nominal);
+			: (this.adjustmentFilter.match(`${adjustment.getAttribute('filter')}\\((-?\\d+).*\\)`)?.[1] || nominal);
 
 		// range
 		this.adjustmentRange.min = adjustment.getAttribute('min');
@@ -230,13 +230,21 @@ class ImageView extends HTMLElementBase {
 		const unit = this.activeAdjustment.getAttribute('unit') || '%';
 
 		// I can probably just replace the value rather than the whole filter string
-		this.adjustmentString = this.adjustmentString.replace(new RegExp(`${filter}\\(-?\\d+${unit}\\)`), `${filter}(${currentValue}${unit})`);
-		this.mainImage.style.filter = this.adjustmentString;
+		this.adjustmentFilter = this.adjustmentFilter.replace(new RegExp(`${filter}\\(-?\\d+${unit}\\)`), `${filter}(${currentValue}${unit})`);
+		this.mainImage.style.filter = this.adjustmentFilter;
+	}
+
+	onFlipClick(dir) {
+		this.adjustmentTransform[dir] *= -1;
+		this.mainImage.style.transform = `scale(${this.adjustmentTransform.x}, ${this.adjustmentTransform.y})`;
 	}
 
 	onResetClick() {
-		this.adjustmentString = 'brightness(100%) contrast(100%) saturate(100%) hue-rotate(0deg) invert(0%) sepia(0%)';;
+		this.adjustmentFilter = 'brightness(100%) contrast(100%) saturate(100%) hue-rotate(0deg) invert(0%) sepia(0%)';
 		this.onAdjustmentToggleClick(this.querySelector('#adjustments-panel .ic-brightness'));
+
+		this.adjustmentTransform = { x: 1, y: 1 };
+		this.mainImage.style.transform = '';
 	}
 	onSaveClick() {
 		const canvas = document.createElement('canvas');
@@ -244,7 +252,13 @@ class ImageView extends HTMLElementBase {
 		canvas.height = this.mainImage.naturalHeight;
 
 		const ctx = canvas.getContext('2d');
-		ctx.filter = this.adjustmentString;
+		ctx.filter = this.adjustmentFilter;
+
+		ctx.translate(
+			this.adjustmentTransform.x < 0 ? canvas.width : 0,
+			this.adjustmentTransform.y < 0 ? canvas.height : 0
+		);
+		ctx.scale(this.adjustmentTransform.x, this.adjustmentTransform.y);
 
 		ctx.drawImage(this.mainImage, 0, 0, canvas.width, canvas.height);
 
@@ -310,6 +324,10 @@ class ImageView extends HTMLElementBase {
 					<button icon class="ic-invert" aria-label="Invert" filter="invert" nominal="0" min="0" max="100" onclick="${this}.onAdjustmentToggleClick(this)"></button>
 					<button icon class="ic-sepia" aria-label="Sepia" filter="sepia" nominal="0" min="0" max="100" onclick="${this}.onAdjustmentToggleClick(this)"></button>
 					<separator></separator>
+					<button icon class="ic-flip-h" aria-label="Flip Horizontal" onclick="${this}.onFlipClick('x')"></button>
+					<button icon class="ic-flip-v" aria-label="Flip Vertical" onclick="${this}.onFlipClick('y')"></button>
+					<!-- <button icon class="ic-crop" aria-label="Crop" onclick="${this}.onCropClick(this)"></button> -->
+					<separator></separator>
 					<button icon class="ic-save" aria-label="Save" onclick="${this}.onSaveClick()"></button>
 					<button icon class="ic-undo-all" aria-label="Reset" onclick="${this}.onResetClick()"></button>
 				</adjustments-carousel>
@@ -332,7 +350,8 @@ class ImageView extends HTMLElementBase {
 		// reset the transform + gesture + adjustments
 		this.transform = { x: 0, y: 0, rotate: 0, scale: 1 };
 		this.gesture = {};
-		this.adjustmentString = 'brightness(100%) contrast(100%) saturate(100%) hue-rotate(0deg) invert(0%) sepia(0%)';
+		this.adjustmentFilter = 'brightness(100%) contrast(100%) saturate(100%) hue-rotate(0deg) invert(0%) sepia(0%)';
+		this.adjustmentTransform = { x: 1, y: 1 };
 
 		// Mark active thumbnail & scroll it into center
 		this.querySelector(`thumbnail-carousel img[src="${BASE_THUMB_PATH}${state.image.path}"]`)
@@ -345,7 +364,6 @@ class ImageView extends HTMLElementBase {
 		// activate the brightness
 		this.onAdjustmentToggleClick(this.querySelector('#adjustments-panel .ic-brightness'));
 	}
-
 	#renderInfo() {
 		return `
 			<h1>${state.image.name}</h1>
