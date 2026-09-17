@@ -8,14 +8,14 @@ plugins {
 
 android {
 	namespace = "com.minimalist.gallery"
-	compileSdk = 36
+	compileSdk = 37
 
 	defaultConfig {
 		applicationId = "com.minimalist.gallery"
 		minSdk = 30
-		targetSdk = 36
-		versionCode = 10
-		versionName = "2.4"
+		targetSdk = 37
+		versionCode = 11
+		versionName = "2.5"
 	}
 
 	compileOptions {
@@ -52,6 +52,7 @@ android {
 		}
 		release {
 			isMinifyEnabled = true
+			isShrinkResources = true
 			proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 
 			ndk {
