@@ -27,6 +27,15 @@ class LocalAssetLoader(context: Context) {
 	private class MediaStoreThumbnailPathHandler(private val context: Context) : WebViewAssetLoader.PathHandler {
 		override fun handle(path: String): WebResourceResponse {
 			try {
+				val contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, path.toLong())
+				val mimeType = context.contentResolver.getType(contentUri)
+
+				// getThumbnail() returns null for SVGs - serve the raw file stream instead.
+				if (mimeType == "image/svg+xml") {
+					val inputStream = context.contentResolver.openInputStream(contentUri)
+					return WebResourceResponse("image/svg+xml", "UTF-8", inputStream)
+				}
+
 				@Suppress("DEPRECATION")
 				val thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
 					context.contentResolver, path.toLong(), MediaStore.Images.Thumbnails.MINI_KIND, null
